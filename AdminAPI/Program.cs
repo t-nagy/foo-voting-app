@@ -1,4 +1,8 @@
 
+using AdminAPI.Controllers.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace AdminAPI
 {
     public class Program
@@ -14,6 +18,14 @@ namespace AdminAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<DataContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+
+            builder.Services.AddAuthorization();
+
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+                .AddEntityFrameworkStores<DataContext>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,6 +34,8 @@ namespace AdminAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.MapIdentityApi<IdentityUser>();
 
             app.UseHttpsRedirection();
 
