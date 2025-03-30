@@ -9,5 +9,5 @@
 	[VoteValidationEndDate] DATETIME2 NOT NULL, 
     [IsPublic] BIT NOT NULL,
 	[Status] INT NOT NULL DEFAULT 0, 
-    [JoinCode] NVARCHAR(128) NULL
+    [JoinCode] NVARCHAR(128) UNIQUE NULL
 )

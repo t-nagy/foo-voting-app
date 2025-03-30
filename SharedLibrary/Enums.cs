@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace SharedLibrary
 {
-    public enum Role
+    public enum PollRole
     {
         Owner,
         Voter
     }
 
-    public enum ElectionStatus
+    public enum PollStatus
     {
         Vote,
         Validate,

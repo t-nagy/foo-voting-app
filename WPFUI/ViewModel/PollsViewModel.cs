@@ -8,14 +8,14 @@ using System.Windows.Controls;
 
 namespace WPFUI.ViewModel
 {
-    class ElectionsViewModel : ViewModelBase
+    class PollsViewModel : ViewModelBase
     {
 
         public DelegateCommand AccountSettingsCommand { get; set; }
 
         public event EventHandler? ShowAccountSettingsPage;
 
-        public ElectionsViewModel()
+        public PollsViewModel()
         {
             AccountSettingsCommand = new DelegateCommand((param) =>
             {

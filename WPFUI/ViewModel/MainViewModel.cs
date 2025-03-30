@@ -36,8 +36,8 @@ namespace WPFUI.ViewModel
         private readonly RegistrationCompletePage _registrationCompletePage;
         private RegistrationCompleteViewModel? _registrationCompleteViewModel;
 
-        private readonly ElectionsPage _electionsPage;
-        private ElectionsViewModel? _electionsViewModel;
+        private readonly PollsPage _pollsPage;
+        private PollsViewModel? _pollsViewModel;
 
         private readonly ForgotPasswordPage _forgotPasswordPage;
         private ForgotPasswordViewModel? _forgotPasswordViewModel;
@@ -55,7 +55,7 @@ namespace WPFUI.ViewModel
             _loginPage = new LoginPage();
             _registerPage = new RegisterPage();
             _registrationCompletePage = new RegistrationCompletePage();
-            _electionsPage = new ElectionsPage();
+            _pollsPage = new PollsPage();
             _forgotPasswordPage = new ForgotPasswordPage();
             _accountSettingsPage = new AccountSettingsPage();
 
@@ -67,7 +67,7 @@ namespace WPFUI.ViewModel
             _loginViewModel = null;
             _registerViewModel = null;
             _registrationCompleteViewModel = null;
-            _electionsViewModel = null;
+            _pollsViewModel = null;
             _forgotPasswordViewModel = null;
             _accountSettingsViewModel = null;
         }
@@ -79,7 +79,7 @@ namespace WPFUI.ViewModel
             {
                 _loginViewModel = new LoginViewModel(_accountManager);
                 _loginViewModel.ShowRegisterPage += ShowRegisterEvent;
-                _loginViewModel.ShowElectionsPage += ShowElectionsPageEvent;
+                _loginViewModel.ShowPollsPage += ShowPollsPageEvent;
                 _loginViewModel.ShowForgotPasswordPage += ShowForgotPasswordEvent;
                 _loginPage.DataContext = _loginViewModel;
             }
@@ -110,16 +110,16 @@ namespace WPFUI.ViewModel
             ActivePage = _registrationCompletePage;
         }
 
-        private void ShowElectionsPage()
+        private void ShowPollsPage()
         {
-            if (_registerViewModel == null)
+            if (_pollsViewModel == null)
             {
-                _electionsViewModel = new ElectionsViewModel();
-                _electionsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
-                _electionsPage.DataContext = _electionsViewModel;
+                _pollsViewModel = new PollsViewModel();
+                _pollsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
+                _pollsPage.DataContext = _pollsViewModel;
             }
 
-            ActivePage = _electionsPage;
+            ActivePage = _pollsPage;
         }
 
         private void ShowForgotPassword(string email = "")
@@ -160,9 +160,9 @@ namespace WPFUI.ViewModel
             ShowRegistrationComplete();
         }
 
-        private void ShowElectionsPageEvent(object? sender, EventArgs e)
+        private void ShowPollsPageEvent(object? sender, EventArgs e)
         {
-            ShowElectionsPage();
+            ShowPollsPage();
         }
 
         private void LoginRequiredEvent(object? sender, EventArgs e)

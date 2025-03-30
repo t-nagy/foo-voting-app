@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace WPFUI.View
 {
     /// <summary>
-    /// Interaction logic for ElectionsPage.xaml
+    /// Interaction logic for CreatePollPage.xaml
     /// </summary>
-    public partial class ElectionsPage : Page
+    public partial class CreatePollPage : Page
     {
-        public ElectionsPage()
+        public CreatePollPage()
         {
             InitializeComponent();
         }

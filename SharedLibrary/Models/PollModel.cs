@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace SharedLibrary.Models
 {
-    public class ElectionModel
+    public class PollModel
     {
+        public int Id { get; set; }
         public required string OwnerName { get; set; }
         public required string Title { get; set; }
         public string? Description { get; set; }
@@ -15,6 +16,6 @@ namespace SharedLibrary.Models
         public DateTime VoteCollectionEndDate { get; set; }
         public DateTime VoteValidationEndDate { get; set; }
         public bool IsPublic { get; set; }
-        public string? ElectionCode { get; set; }
+        public string? JoinCode { get; set; }
     }
 }

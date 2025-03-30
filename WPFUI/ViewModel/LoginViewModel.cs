@@ -21,7 +21,7 @@ namespace WPFUI.ViewModel
 
 
         public event EventHandler? ShowRegisterPage;
-        public event EventHandler? ShowElectionsPage;
+        public event EventHandler? ShowPollsPage;
         public event EventHandler<string>? ShowForgotPasswordPage;
 
 
@@ -108,7 +108,7 @@ namespace WPFUI.ViewModel
             LoginResponse response = await _accountOperationManager.Login(EmailAddress, password);
             if (response == LoginResponse.Success)
             {
-                ShowElectionsPage?.Invoke(this, EventArgs.Empty);
+                ShowPollsPage?.Invoke(this, EventArgs.Empty);
             }
             else
             {
