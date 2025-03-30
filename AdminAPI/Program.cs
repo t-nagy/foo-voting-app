@@ -1,7 +1,10 @@
 
 using AdminAPI.Controllers.Data;
+using AdminAPI.Services;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -37,11 +40,19 @@ namespace AdminAPI
             builder.Services.AddAuthorization();
 
             builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-                .AddEntityFrameworkStores<DataContext>();
+                .AddEntityFrameworkStores<DataContext>()
+                .AddApiEndpoints();
+
+            builder.Services.AddOptions<IdentityOptions>().Configure(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+            });
 
             builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme).Configure(options => {
                 options.BearerTokenExpiration = TimeSpan.FromSeconds(60);
             });
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             var app = builder.Build();
 

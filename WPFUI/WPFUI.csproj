@@ -9,7 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\clear-filter-svgrepo-com.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ClientLib\ClientLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\clear-filter-svgrepo-com.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

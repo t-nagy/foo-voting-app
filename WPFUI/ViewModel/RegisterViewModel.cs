@@ -10,11 +10,34 @@ namespace WPFUI.ViewModel
 {
     internal class RegisterViewModel : ViewModelBase
     {
-        private AccountOperationManager _accountOperations;
-        private ISessionManager _sessionManager;
+        private IAccountOperationManager _accountOperations;
 
-        private string? _password;
-        private string? _confirmPassword;
+
+        public DelegateCommand RegisterCommand { get; private set; }
+        public DelegateCommand LoginCommand { get; private set; }
+
+
+        public event EventHandler<bool>? ShowLoginPage;
+        public event EventHandler? RegistrationComplete;
+
+
+        public RegisterViewModel(IAccountOperationManager accountOperations)
+        {
+            _accountOperations = accountOperations;
+            RegisterCommand = new DelegateCommand((param) =>
+            {
+                if (param is PasswordBoxPair pws)
+                {
+                    Register(pws.Password!.Password, pws.ConfirmPassword!.Password);
+                }
+            });
+
+            LoginCommand = new DelegateCommand((param) =>
+            {
+                ShowLoginPage?.Invoke(this, false);
+            });
+        }
+
 
         private string? _emailAddress;
 
@@ -24,45 +47,42 @@ namespace WPFUI.ViewModel
             set { _emailAddress = value; OnPropertyChanged(); }
         }
 
-        public DelegateCommand RegisterCommand { get; private set; }
-        public DelegateCommand LoginCommand { get; private set; }
+        private bool _isErrorTextVisible = false;
 
-        public event EventHandler<EventArgs>? ShowLoginPage;
-
-        public RegisterViewModel(AccountOperationManager accountOperations, ISessionManager sessionManager)
+        public bool IsErrorTextVisible
         {
-            _accountOperations = accountOperations;
-            _sessionManager = sessionManager;
-            RegisterCommand = new DelegateCommand((param) =>
-            {
-                if (param is PasswordBoxPair pws)
-                {
-                    Register(pws.Password!.Password, pws.ConfirmPassword!.Password);
-
-                }
-            });
-
-            LoginCommand = new DelegateCommand((param) =>
-            {
-                ShowLoginPage?.Invoke(this, EventArgs.Empty);
-            });
+            get { return _isErrorTextVisible; }
+            set { _isErrorTextVisible = value; OnPropertyChanged(); }
         }
+
+        private string _errorText = string.Empty;
+
+        public string ErrorText
+        {
+            get { return _errorText; }
+            set { _errorText = value; OnPropertyChanged(); }
+        }
+
+
 
         private async void Register(string? password, string? confirmPassword)
         {
             if (!ValidateInput(password, confirmPassword))
             {
+                ErrorText = "The passwords do not match!";
+                IsErrorTextVisible = true;
                 return;
             }
 
-            if (await _accountOperations.Register(EmailAddress!, password!))
+            string? errors = await _accountOperations.Register(EmailAddress!, password!);
+            if (errors == null)
             {
-                string? token = (await _sessionManager.GetAuthenticationToken()) ?? "";
-                MessageBox.Show($"Successful registration and login.\nToken: {token}");
+                RegistrationComplete?.Invoke(this, EventArgs.Empty);
             }
             else
             {
-                MessageBox.Show("Unsuccessful registration.");
+                ErrorText = errors.TrimEnd();
+                IsErrorTextVisible = true;
             }
         }
 

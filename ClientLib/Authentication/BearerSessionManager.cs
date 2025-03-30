@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace ClientLib.Authentication
         private const string server_addr = "https://localhost:7119";
         private HttpClient client = new HttpClient();
 
+        public string? LoggedInEmail { get; private set; }
         private string? AuthenticationToken { get; set; }
         private string? RefreshToken { get; set; }
         private DateTime? _expiration;
@@ -57,7 +59,7 @@ namespace ClientLib.Authentication
             return null;
         }
 
-        public async Task<bool> StartNewSession(string email, string password)
+        public async Task<LoginResponse> StartNewSession(string email, string password)
         {
             HttpResponseMessage response = await client.PostAsJsonAsync("/login", new { email, password });
             if (!response.IsSuccessStatusCode)
@@ -65,7 +67,18 @@ namespace ClientLib.Authentication
                 // TODO - Replace with error handling
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    return false;
+                    string responseJsonString = await response.Content.ReadAsStringAsync();
+                    JObject responseJson = JObject.Parse(responseJsonString);
+                    string? detail = responseJson["detail"]!.ToString();
+                    switch (detail.ToLower())
+                    {
+                        case "notallowed":
+                            return LoginResponse.EmailNotConfirmed;
+                        case "failed":
+                            return LoginResponse.InvalidCredentials;
+                        default:
+                            return LoginResponse.UnknownFailure;
+                    }
                 }
                 throw new HttpRequestException($"{response.StatusCode}: {response.Content}");
             }
@@ -75,9 +88,11 @@ namespace ClientLib.Authentication
                 AuthenticationToken = res.AccessToken;
                 RefreshToken = res.RefreshToken;
                 _expiration = DateTime.Now.AddSeconds(res.ExpiresIn);
-                return true;
+                LoggedInEmail = email;
+                return LoginResponse.Success;
             }
-            return false;
+
+            return LoginResponse.UnknownFailure;
         }
 
         private async Task<bool> RefreshAuthenticationToken()
@@ -97,6 +112,14 @@ namespace ClientLib.Authentication
                 return true;
             }
             return false;
+        }
+
+        private void Logout()
+        {
+            AuthenticationToken = null;
+            RefreshToken = null;
+            LoggedInEmail = null;
+            _expiration = null;
         }
     }
 }

@@ -6,8 +6,8 @@ namespace ClientLib.Authentication
         event EventHandler<EventArgs>? LoginRequiredEvent;
 
         public bool IsLoggedIn { get; }
-
+        public string? LoggedInEmail { get; }
         Task<string?> GetAuthenticationToken();
-        Task<bool> StartNewSession(string email, string password);
+        Task<LoginResponse> StartNewSession(string email, string password);
     }
 }

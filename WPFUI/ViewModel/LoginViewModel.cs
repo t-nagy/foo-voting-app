@@ -12,15 +12,24 @@ namespace WPFUI.ViewModel
 {
     public class LoginViewModel : ViewModelBase
     {
-        private ISessionManager _sessionManager;
+        private readonly ISessionManager _sessionManager;
+        private readonly IAccountOperationManager _accountOperationManager;
+
         public DelegateCommand LoginCommand { get; private set; }
         public DelegateCommand RegisterCommand { get; private set; }
+        public DelegateCommand ResendEmailCommand { get; private set; }
+        public DelegateCommand ForgotPasswordCommand { get; private set; }
 
-        public event EventHandler<EventArgs>? ShowRegisterPage;
 
-        public LoginViewModel(ISessionManager sessionManager)
+        public event EventHandler? ShowRegisterPage;
+        public event EventHandler? ShowElectionsPage;
+        public event EventHandler<string>? ShowForgotPasswordPage;
+
+
+        public LoginViewModel(ISessionManager sessionManager, IAccountOperationManager accountOperationManager)
         {
             _sessionManager = sessionManager;
+            _accountOperationManager = accountOperationManager;
 
             LoginCommand = new DelegateCommand((param) =>
             {
@@ -34,34 +43,111 @@ namespace WPFUI.ViewModel
             {
                 ShowRegisterPage?.Invoke(this, EventArgs.Empty);
             });
+
+            ResendEmailCommand = new DelegateCommand((param) =>
+            {
+                ResendEmailConfirmation();
+            });
+
+            ForgotPasswordCommand = new DelegateCommand((param) =>
+            {
+                ShowForgotPasswordPage?.Invoke(this, EmailAddress);
+            });
         }
 
-        private string? _emailAddress;
+        private string _emailAddress = string.Empty;
 
-        public string? EmailAddress
+        public string EmailAddress
         {
             get { return _emailAddress; }
             set { _emailAddress = value; OnPropertyChanged(); }
         }
 
+        private bool _isErrorTextVisible;
+
+        public bool IsErrorTextVisible
+        {
+            get { return _isErrorTextVisible; }
+            set { _isErrorTextVisible = value; OnPropertyChanged(); }
+        }
+
+        private string _errorText = string.Empty;
+
+        public string ErrorText
+        {
+            get { return _errorText; }
+            set { _errorText = value; OnPropertyChanged(); }
+        }
+
+        private bool _isEmailResendVisible = false;
+
+        public bool IsEmailResendVisible
+        {
+            get { return _isEmailResendVisible; }
+            set { _isEmailResendVisible = value; OnPropertyChanged(); }
+        }
+
+        private bool _isForgotPasswordVisible = false;
+
+        public bool IsForgotPasswordVisible
+        {
+            get { return _isForgotPasswordVisible; }
+            set { _isForgotPasswordVisible = value; OnPropertyChanged(); }
+        }
+
+
 
         private async void Login(string password)
         {
-            if (string.IsNullOrEmpty(EmailAddress))
+            LoginResponse response = await _sessionManager.StartNewSession(EmailAddress, password);
+            if (response == LoginResponse.Success)
             {
-                return;
-            }
-            BearerSessionManager sessionManager = new BearerSessionManager();
-            bool loginSuccess = await sessionManager.StartNewSession(EmailAddress, password);
-            string? token = await sessionManager.GetAuthenticationToken();
-            if (loginSuccess && token != null)
-            {
-                MessageBox.Show($"Successfully logged in as {EmailAddress}.\nRecieved token: {token}");
+                ShowElectionsPage?.Invoke(this, EventArgs.Empty);
             }
             else
             {
-                MessageBox.Show("Login unsuccessful");
+                HandleLoginError(response);
             }
         }
+
+        private async void ResendEmailConfirmation()
+        {
+            if (await _accountOperationManager.ResendEmailConfirmation(EmailAddress))
+            {
+                ErrorText = "A new confirmation link has been sent to your email address.";
+                IsEmailResendVisible = false;
+            }
+            else
+            {
+                ErrorText = "An error occured while requesting your new confirmation email. Please try again later!";
+            }
+        }
+
+        private void HandleLoginError(LoginResponse errorStatus)
+        {
+            ErrorText = string.Empty;
+            IsEmailResendVisible = false;
+            IsForgotPasswordVisible = false;
+            switch (errorStatus)
+            {
+                case LoginResponse.Success:
+                    throw new InvalidOperationException("Login was successful but UI started login error handling");
+                case LoginResponse.InvalidCredentials:
+                    ErrorText = "The provided email address or password was invalid. If you have forgotten your password use the button below to reset it!";
+                    IsForgotPasswordVisible = true;
+                    break;
+                case LoginResponse.EmailNotConfirmed:
+                    ErrorText = "Your email address has not yet been confirmed. Please confirm it or request a new confirmation link using the button below!";
+                    IsEmailResendVisible = true;
+                    break;
+                case LoginResponse.UnknownFailure:
+                    ErrorText = "An unknown failure has occured during login. Please try again later!";
+                    break;
+                default:
+                    break;
+            }
+            IsErrorTextVisible = true;
+        }
+
     }
 }

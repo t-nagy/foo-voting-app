@@ -13,7 +13,7 @@ namespace WPFUI;
 public partial class App : Application
 {
     private static ISessionManager _sessionManager = new BearerSessionManager();
-    private static AccountOperationManager _accountOperations = new AccountOperationManager(_sessionManager);
+    private static IAccountOperationManager _accountOperations = new ApiAccountOperationManager();
 
     private static MainWindow? _mainWindow;
     private static MainViewModel? _mainViewModel;
