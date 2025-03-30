@@ -124,13 +124,10 @@ namespace WPFUI.ViewModel
 
         private void ShowForgotPassword(string email = "")
         {
-            if (_forgotPasswordViewModel == null)
-            {
-                _forgotPasswordViewModel = new ForgotPasswordViewModel(_accountManager);
-                _forgotPasswordViewModel.EmailAddress = email;
-                _forgotPasswordViewModel.ShowLoginPage += ShowLoginEvent;
-                _forgotPasswordPage.DataContext = _forgotPasswordViewModel;
-            }
+            _forgotPasswordViewModel = new ForgotPasswordViewModel(_accountManager);
+            _forgotPasswordViewModel.EmailAddress = email;
+            _forgotPasswordViewModel.ShowLoginPage += ShowLoginEvent;
+            _forgotPasswordPage.DataContext = _forgotPasswordViewModel;
 
             ActivePage = _forgotPasswordPage;
         }

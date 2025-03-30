@@ -63,10 +63,17 @@ namespace WPFUI.ViewModel
             set { _errorText = value; OnPropertyChanged(); }
         }
 
+        private bool _buttonsEnabled = true;
 
+        public bool ButtonsEnabled
+        {
+            get { return _buttonsEnabled; }
+            set { _buttonsEnabled = value; OnPropertyChanged(); }
+        }
 
         private async void Register(string? password, string? confirmPassword)
         {
+            ButtonsEnabled = false;
             if (!ValidateInput(password, confirmPassword))
             {
                 ErrorText = "The passwords do not match!";
@@ -84,6 +91,7 @@ namespace WPFUI.ViewModel
                 ErrorText = errors.TrimEnd();
                 IsErrorTextVisible = true;
             }
+            ButtonsEnabled = true;
         }
 
         private bool ValidateInput(string? password, string? confirmPassword)

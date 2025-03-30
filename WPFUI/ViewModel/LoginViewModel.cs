@@ -93,10 +93,18 @@ namespace WPFUI.ViewModel
             set { _isForgotPasswordVisible = value; OnPropertyChanged(); }
         }
 
+        private bool _buttonsEnabled = true;
+
+        public bool ButtonsEnabled
+        {
+            get { return _buttonsEnabled; }
+            set { _buttonsEnabled = value; OnPropertyChanged(); }
+        }
 
 
         private async void Login(string password)
         {
+            ButtonsEnabled = false;
             LoginResponse response = await _accountOperationManager.Login(EmailAddress, password);
             if (response == LoginResponse.Success)
             {
@@ -106,6 +114,7 @@ namespace WPFUI.ViewModel
             {
                 HandleLoginError(response);
             }
+            ButtonsEnabled = true;
         }
 
         private async void ResendEmailConfirmation()

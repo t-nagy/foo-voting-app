@@ -36,7 +36,7 @@
                 <PasswordBox x:Name="loginPassword" Margin="0 5 0 0" FontSize="{DynamicResource FontSize-Large}" MinHeight="30" VerticalContentAlignment="Center"/>
                 <Label Margin="0 10 0 0" FontSize="{DynamicResource FontSize-Larger}" Foreground="DarkSlateGray">Password again</Label>
                 <PasswordBox x:Name="confirmPassword" Margin="0 5 0 0" FontSize="{DynamicResource FontSize-Large}" MinHeight="30" VerticalContentAlignment="Center"/>
-                <Button Command="{Binding RegisterCommand}"
+                <Button Command="{Binding RegisterCommand}" IsEnabled="{Binding ButtonsEnabled}"
                 FontSize="{DynamicResource FontSize-Larger}"
                 Margin="0 10 0 0"
                 Content="Register"
@@ -52,7 +52,7 @@
                 </Button>
                 <TextBlock Foreground="Red" Text="{Binding ErrorText}" Margin="0 10 0 0" TextWrapping="Wrap" Visibility="{Binding Path=IsErrorTextVisible, Converter={StaticResource visConverter}}"/>
                 <Label HorizontalAlignment="Center" Margin="0 30 0 0" FontSize="{DynamicResource FontSize-Larger}">Already have an account?</Label>
-                <Button Command="{Binding LoginCommand}" FontSize="{DynamicResource FontSize-Larger}">Login</Button>
+                <Button Command="{Binding LoginCommand}" IsEnabled="{Binding ButtonsEnabled}" FontSize="{DynamicResource FontSize-Larger}">Login</Button>
 
             </StackPanel>
         </Border>

@@ -95,7 +95,7 @@ namespace WPFUI.ViewModel
             set { _isErrorTextVisible = value; OnPropertyChanged(); }
         }
 
-        private string _errorText;
+        private string _errorText = "";
 
         public string ErrorText
         {
@@ -103,9 +103,17 @@ namespace WPFUI.ViewModel
             set { _errorText = value; OnPropertyChanged(); }
         }
 
+        private bool _buttonsEnabled = true;
+
+        public bool ButtonsEnabled
+        {
+            get { return _buttonsEnabled; }
+            set { _buttonsEnabled = value; OnPropertyChanged(); }
+        }
 
         private async void RequestResetToken()
         {
+            ButtonsEnabled = false;
             if (await _accountOperationManager.ForgotPassword(EmailAddress))
             {
                 ForgotNoticeText = "An email containing your reset code has been sent to your email adress.";
@@ -117,10 +125,12 @@ namespace WPFUI.ViewModel
                 ForgotNoticeColor = "Red";
             }
             IsForgotNoticeVisible = true;
+            ButtonsEnabled = true;
         }
 
         private async void ResetPassword(string password, string confirmPassword)
         {
+            ButtonsEnabled = false;
             if (!ValidateInput(password, confirmPassword))
             {
                 ErrorText = "The passwords do not match!";
@@ -140,6 +150,7 @@ namespace WPFUI.ViewModel
                 ErrorText = errors.TrimEnd();
                 IsErrorTextVisible = true;
             }
+            ButtonsEnabled = true;
         }
 
         private bool ValidateInput(string? password, string? confirmPassword)
