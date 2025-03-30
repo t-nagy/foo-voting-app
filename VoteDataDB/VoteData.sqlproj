@@ -60,10 +60,11 @@
     <Folder Include="Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Tables\Election.sql" />
-    <Build Include="Tables\ElectionAccess.sql" />
-    <Build Include="Stored Procedures\uspGetElections.sql" />
-    <Build Include="Stored Procedures\uspCreateElection.sql" />
-    <Build Include="Stored Procedures\uspAddElectionParticipant.sql" />
+    <Build Include="Tables\Poll.sql" />
+    <Build Include="Tables\Participant.sql" />
+    <Build Include="Stored Procedures\uspPoll_GetAll.sql" />
+    <Build Include="Stored Procedures\uspPoll_Insert.sql" />
+    <Build Include="Stored Procedures\uspParticipant_Insert.sql" />
+    <Build Include="Stored Procedures\uspPoll_GetById.sql" />
   </ItemGroup>
 </Project>
