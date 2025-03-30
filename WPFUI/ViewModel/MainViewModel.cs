@@ -13,8 +13,8 @@ namespace WPFUI.ViewModel
     internal class MainViewModel : ViewModelBase
     {
         #region Private fields
-        private ISessionManager _sessionManager;
-        private IAccountOperationManager _accountManager;
+        private readonly IAccountOperationManager _accountManager;
+        private Page? _returnPage;
         #endregion
 
         private Page? _activePage;
@@ -27,42 +27,57 @@ namespace WPFUI.ViewModel
 
 
         #region Pages and ViewmMdels
-        private LoginPage? _loginPage;
+        private readonly LoginPage _loginPage;
         private LoginViewModel? _loginViewModel;
 
-        private RegisterPage? _registerPage;
+        private readonly RegisterPage _registerPage;
         private RegisterViewModel? _registerViewModel;
 
-        private RegistrationCompletePage? _registrationCompletePage;
+        private readonly RegistrationCompletePage _registrationCompletePage;
         private RegistrationCompleteViewModel? _registrationCompleteViewModel;
 
-        private ElectionsPage? _electionsPage;
+        private readonly ElectionsPage _electionsPage;
         private ElectionsViewModel? _electionsViewModel;
 
-        private ForgotPasswordPage? _forgotPasswordPage;
+        private readonly ForgotPasswordPage _forgotPasswordPage;
         private ForgotPasswordViewModel? _forgotPasswordViewModel;
+
+        private readonly AccountSettingsPage _accountSettingsPage;
+        private AccountSettingsViewModel? _accountSettingsViewModel;
         #endregion
 
 
-        public MainViewModel(ISessionManager sessionManager, IAccountOperationManager accountManager)
+        public MainViewModel(IAccountOperationManager accountManager)
         {
-            _sessionManager = sessionManager;
             _accountManager = accountManager;
-            _sessionManager.LoginRequiredEvent += LoginRequiredEvent;
+            _accountManager.LoginRequired += LoginRequiredEvent;
 
-            //_activePage = new ElectionsPage();
+            _loginPage = new LoginPage();
+            _registerPage = new RegisterPage();
+            _registrationCompletePage = new RegistrationCompletePage();
+            _electionsPage = new ElectionsPage();
+            _forgotPasswordPage = new ForgotPasswordPage();
+            _accountSettingsPage = new AccountSettingsPage();
 
             ShowLogin(true);
         }
 
+        private void ResetViewModels()
+        {
+            _loginViewModel = null;
+            _registerViewModel = null;
+            _registrationCompleteViewModel = null;
+            _electionsViewModel = null;
+            _forgotPasswordViewModel = null;
+            _accountSettingsViewModel = null;
+        }
 
         #region Show page methods
         private void ShowLogin(bool clear)
         {
-            if (_loginPage == null || _loginViewModel == null || clear)
+            if (_loginViewModel == null || clear)
             {
-                _loginViewModel = new LoginViewModel(_sessionManager, _accountManager);
-                _loginPage = new LoginPage();
+                _loginViewModel = new LoginViewModel(_accountManager);
                 _loginViewModel.ShowRegisterPage += ShowRegisterEvent;
                 _loginViewModel.ShowElectionsPage += ShowElectionsPageEvent;
                 _loginViewModel.ShowForgotPasswordPage += ShowForgotPasswordEvent;
@@ -74,7 +89,6 @@ namespace WPFUI.ViewModel
 
         private void ShowRegister()
         {
-            _registerPage = new RegisterPage();
             _registerViewModel = new RegisterViewModel(_accountManager);
             _registerViewModel.ShowLoginPage += ShowLoginEvent;
             _registerViewModel.RegistrationComplete += ShowRegistrationCompleteEvent;
@@ -86,9 +100,8 @@ namespace WPFUI.ViewModel
 
         private void ShowRegistrationComplete()
         {
-            if (_registrationCompletePage == null || _registrationCompleteViewModel == null)
+            if (_registrationCompleteViewModel == null)
             {
-                _registrationCompletePage = new RegistrationCompletePage();
                 _registrationCompleteViewModel = new RegistrationCompleteViewModel();
                 _registrationCompleteViewModel.ShowLoginPage += ShowLoginEvent;
                 _registrationCompletePage.DataContext = _registrationCompleteViewModel;
@@ -99,10 +112,10 @@ namespace WPFUI.ViewModel
 
         private void ShowElectionsPage()
         {
-            if (_electionsPage == null || _registerViewModel == null)
+            if (_registerViewModel == null)
             {
-                _electionsPage = new ElectionsPage();
-                _electionsViewModel = new ElectionsViewModel(_sessionManager);
+                _electionsViewModel = new ElectionsViewModel();
+                _electionsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
                 _electionsPage.DataContext = _electionsViewModel;
             }
 
@@ -111,9 +124,8 @@ namespace WPFUI.ViewModel
 
         private void ShowForgotPassword(string email = "")
         {
-            if (_forgotPasswordPage == null || _forgotPasswordViewModel == null)
+            if (_forgotPasswordViewModel == null)
             {
-                _forgotPasswordPage = new ForgotPasswordPage();
                 _forgotPasswordViewModel = new ForgotPasswordViewModel(_accountManager);
                 _forgotPasswordViewModel.EmailAddress = email;
                 _forgotPasswordViewModel.ShowLoginPage += ShowLoginEvent;
@@ -121,6 +133,15 @@ namespace WPFUI.ViewModel
             }
 
             ActivePage = _forgotPasswordPage;
+        }
+
+        private void ShowAccountSettingsPage()
+        {
+            _returnPage = ActivePage;
+            _accountSettingsViewModel = new AccountSettingsViewModel(_accountManager);
+            _accountSettingsViewModel.CloseAccountSettingsPageEvent += CloseAccountSettingsPageEvent;
+            _accountSettingsPage.DataContext = _accountSettingsViewModel;
+            ActivePage = _accountSettingsPage;
         }
         #endregion
 
@@ -149,12 +170,26 @@ namespace WPFUI.ViewModel
 
         private void LoginRequiredEvent(object? sender, EventArgs e)
         {
+            ResetViewModels();
+            _returnPage = null;
+
             ShowLogin(true);
         }
 
         private void ShowForgotPasswordEvent(object? sender, string email)
         {
             ShowForgotPassword(email);
+        }
+
+        private void ShowAccountSettingsPageEvent(object? sender, EventArgs e)
+        {
+            ShowAccountSettingsPage();
+        }
+
+        private void CloseAccountSettingsPageEvent(object? sender, EventArgs e)
+        {
+            _accountSettingsViewModel = null;
+            ActivePage = _returnPage;
         }
         #endregion
     }

@@ -9,17 +9,32 @@ using System.Threading.Tasks;
 
 namespace ClientLib.Authentication
 {
-    public class ApiAccountOperationManager : IAccountOperationManager
+    public class ApiAccountOperationManager : ApiCaller, IAccountOperationManager
     {
         private const string server_addr = "https://localhost:7119";
         private HttpClient client = new HttpClient();
 
-        public ApiAccountOperationManager()
+        public string? LoggedInEmail
+        {
+            get { return _sessionManager.LoggedInEmail; }
+        }
+
+        public ApiAccountOperationManager(ISessionManager sessionManager) : base(sessionManager)
         {
             client.BaseAddress = new Uri(server_addr);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+
+        public async Task<LoginResponse> Login(string email, string password)
+        {
+            return await _sessionManager.StartNewSession(email, password);
+        }
+
+        public void Logout()
+        {
+            _sessionManager.Logout();
         }
 
         public async Task<string?> Register(string email, string password)
@@ -62,7 +77,25 @@ namespace ClientLib.Authentication
                 return ProcessBadPasswordErrors(await response.Content.ReadAsStringAsync());
             }
 
-            return "An unkown error has occured while attempting to change password.";
+            return "An unkown error has occured while attempting to change your password.";
+        }
+
+        public async Task<string?> ChangePassword(string oldPassword, string newPassword)
+        {
+            string? token = await _sessionManager.GetAuthenticationToken();
+            if (token == null) { return "User login required!"; }
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            HttpResponseMessage response = await client.PostAsJsonAsync("/manage/info", new { oldPassword, newPassword });
+            if (response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                return ProcessBadPasswordErrors(await response.Content.ReadAsStringAsync());
+            }
+
+            return "An unkown error has occured while attemtping to change your password.";
         }
 
         private string ProcessBadPasswordErrors(string JsonString)

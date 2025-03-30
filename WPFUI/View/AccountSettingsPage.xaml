@@ -1,0 +1,66 @@
+﻿<Page x:Class="WPFUI.View.AccountSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:WPFUI.View"
+      xmlns:super="clr-namespace:WPFUI"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="AccountSettingsPage" Style="{StaticResource DefaultPage}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="visConverter"/>
+        <super:TriplePasswordsConverter x:Key="PwConverter"/>
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition MinWidth="300" MaxWidth="650" Width="1.5*"/>
+            <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+            <DockPanel VerticalAlignment="Top">
+
+                <Label DockPanel.Dock="Left" Content="Account settings" Margin="10" Style="{StaticResource TitleLabel}" />
+                <Button Command="{Binding CloseAccountSettingsCommand}" Style="{StaticResource IconButton}" Height="60" Width="80" DockPanel.Dock="Right" HorizontalAlignment="Right" BorderThickness="0" ToolTip="Close">
+                    <Path Stroke="Black" Fill="Black" Data="M16 0c-8.836 0-16 7.163-16 16s7.163 16 16 16c8.837 0 16-7.163 16-16s-7.163-16-16-16zM16 30.032c-7.72 0-14-6.312-14-14.032s6.28-14 14-14 14 6.28 14 14-6.28 14.032-14 14.032zM21.657 10.344c-0.39-0.39-1.023-0.39-1.414 0l-4.242 4.242-4.242-4.242c-0.39-0.39-1.024-0.39-1.415 0s-0.39 1.024 0 1.414l4.242 4.242-4.242 4.242c-0.39 0.39-0.39 1.024 0 1.414s1.024 0.39 1.415 0l4.242-4.242 4.242 4.242c0.39 0.39 1.023 0.39 1.414 0s0.39-1.024 0-1.414l-4.242-4.242 4.242-4.242c0.391-0.391 0.391-1.024 0-1.414z"/>
+                </Button>
+            </DockPanel>
+            <Rectangle DockPanel.Dock="Bottom" Stroke="Black" Height="2" StrokeThickness="1" Margin="10 0 10 20" />
+        </StackPanel>
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0 0 0 30" HorizontalAlignment="Center" FontSize="{DynamicResource FontSize-Large}" FontWeight="Bold" FontStyle="Italic" Content="{Binding LoggedInText}"/>
+        <StackPanel Orientation="Vertical" Grid.Row="2" Grid.Column="1">
+            <Label HorizontalAlignment="Center" FontSize="{DynamicResource FontSize-Title}" FontWeight="Bold" Content="Change Password"/>
+            <Label Margin="0 10 0 0" FontSize="{DynamicResource FontSize-Larger}" Foreground="DarkSlateGray">Old password</Label>
+            <PasswordBox x:Name="oldPassword" Margin="0 5 0 0" FontSize="{DynamicResource FontSize-Large}" MinHeight="30" VerticalContentAlignment="Center"/>
+            <Label Margin="0 10 0 0" FontSize="{DynamicResource FontSize-Larger}" Foreground="DarkSlateGray">New password</Label>
+            <PasswordBox x:Name="newPassword" Margin="0 5 0 0" FontSize="{DynamicResource FontSize-Large}" MinHeight="30" VerticalContentAlignment="Center"/>
+            <Label Margin="0 10 0 0" FontSize="{DynamicResource FontSize-Larger}" Foreground="DarkSlateGray">New password again</Label>
+            <PasswordBox x:Name="newPasswordAgain" Margin="0 5 0 0" FontSize="{DynamicResource FontSize-Large}" MinHeight="30" VerticalContentAlignment="Center"/>
+            <Button Command="{Binding ChangePasswordCommand}"
+                    FontSize="{DynamicResource FontSize-Larger}"
+                    Margin="0 10 0 0"
+                    Content="Change Password"
+                    IsDefault="True">
+                <Button.CommandParameter>
+                    <MultiBinding Converter="{StaticResource PwConverter}">
+                        <MultiBinding.Bindings>
+                            <Binding ElementName="oldPassword"/>
+                            <Binding ElementName="newPassword"/>
+                            <Binding ElementName="newPasswordAgain"/>
+                        </MultiBinding.Bindings>
+                    </MultiBinding>
+                </Button.CommandParameter>
+            </Button>
+            <TextBlock Foreground="{Binding PasswordChangeColor}" Text="{Binding PasswordChangeText}" Margin="0 10 0 0" TextWrapping="Wrap" Visibility="{Binding Path=IsPasswordChangeTextVisible, Converter={StaticResource visConverter}}"/>
+            
+            <Button Command="{Binding LogoutCommand}" Content="Log out" Margin="0 30 0 20" FontSize="{DynamicResource FontSize-Larger}"/>
+        </StackPanel>
+    </Grid>
+</Page>

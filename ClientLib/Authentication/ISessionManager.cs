@@ -9,5 +9,6 @@ namespace ClientLib.Authentication
         public string? LoggedInEmail { get; }
         Task<string?> GetAuthenticationToken();
         Task<LoginResponse> StartNewSession(string email, string password);
+        void Logout();
     }
 }

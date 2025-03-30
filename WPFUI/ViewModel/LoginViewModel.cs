@@ -12,7 +12,6 @@ namespace WPFUI.ViewModel
 {
     public class LoginViewModel : ViewModelBase
     {
-        private readonly ISessionManager _sessionManager;
         private readonly IAccountOperationManager _accountOperationManager;
 
         public DelegateCommand LoginCommand { get; private set; }
@@ -26,9 +25,8 @@ namespace WPFUI.ViewModel
         public event EventHandler<string>? ShowForgotPasswordPage;
 
 
-        public LoginViewModel(ISessionManager sessionManager, IAccountOperationManager accountOperationManager)
+        public LoginViewModel(IAccountOperationManager accountOperationManager)
         {
-            _sessionManager = sessionManager;
             _accountOperationManager = accountOperationManager;
 
             LoginCommand = new DelegateCommand((param) =>
@@ -99,7 +97,7 @@ namespace WPFUI.ViewModel
 
         private async void Login(string password)
         {
-            LoginResponse response = await _sessionManager.StartNewSession(EmailAddress, password);
+            LoginResponse response = await _accountOperationManager.Login(EmailAddress, password);
             if (response == LoginResponse.Success)
             {
                 ShowElectionsPage?.Invoke(this, EventArgs.Empty);

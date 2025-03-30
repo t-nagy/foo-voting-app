@@ -114,12 +114,13 @@ namespace ClientLib.Authentication
             return false;
         }
 
-        private void Logout()
+        public void Logout()
         {
             AuthenticationToken = null;
             RefreshToken = null;
             LoggedInEmail = null;
             _expiration = null;
+            LoginRequiredEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 }
