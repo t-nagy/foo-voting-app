@@ -1,4 +1,5 @@
-﻿using ClientLib.Authentication;
+﻿using ClientLib;
+using ClientLib.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace WPFUI.ViewModel
     {
         #region Private fields
         private readonly IAccountOperationManager _accountManager;
+        private readonly IPollManager _pollManager;
         private Page? _returnPage;
         #endregion
 
@@ -44,13 +46,18 @@ namespace WPFUI.ViewModel
 
         private readonly AccountSettingsPage _accountSettingsPage;
         private AccountSettingsViewModel? _accountSettingsViewModel;
+
+        private readonly CreatePollPage _createPollPage;
+        private CreatePollViewModel? _createPollViewModel;
         #endregion
 
 
-        public MainViewModel(IAccountOperationManager accountManager)
+        public MainViewModel(IAccountOperationManager accountManager, IPollManager pollManager)
         {
             _accountManager = accountManager;
+            _pollManager = pollManager;
             _accountManager.LoginRequired += LoginRequiredEvent;
+            _pollManager.LoginRequired += LoginRequiredEvent;
 
             _loginPage = new LoginPage();
             _registerPage = new RegisterPage();
@@ -58,6 +65,7 @@ namespace WPFUI.ViewModel
             _pollsPage = new PollsPage();
             _forgotPasswordPage = new ForgotPasswordPage();
             _accountSettingsPage = new AccountSettingsPage();
+            _createPollPage = new CreatePollPage();
 
             ShowLogin(true);
         }
@@ -70,6 +78,7 @@ namespace WPFUI.ViewModel
             _pollsViewModel = null;
             _forgotPasswordViewModel = null;
             _accountSettingsViewModel = null;
+            _createPollViewModel = null;
         }
 
         #region Show page methods
@@ -116,6 +125,7 @@ namespace WPFUI.ViewModel
             {
                 _pollsViewModel = new PollsViewModel();
                 _pollsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
+                _pollsViewModel.ShowCreateNewPollPage += ShowCreatePollPageEvent;
                 _pollsPage.DataContext = _pollsViewModel;
             }
 
@@ -139,6 +149,14 @@ namespace WPFUI.ViewModel
             _accountSettingsViewModel.CloseAccountSettingsPageEvent += CloseAccountSettingsPageEvent;
             _accountSettingsPage.DataContext = _accountSettingsViewModel;
             ActivePage = _accountSettingsPage;
+        }
+
+        private void ShowCreatePollPage()
+        {
+            _createPollViewModel = new CreatePollViewModel(_pollManager);
+            _createPollViewModel.CancelPollCreation += ShowPollsPageEvent;
+            _createPollPage.DataContext = _createPollViewModel;
+            ActivePage = _createPollPage;
         }
         #endregion
 
@@ -187,6 +205,11 @@ namespace WPFUI.ViewModel
         {
             _accountSettingsViewModel = null;
             ActivePage = _returnPage;
+        }
+
+        private void ShowCreatePollPageEvent(object? sender, EventArgs e)
+        {
+            ShowCreatePollPage();
         }
         #endregion
     }

@@ -3,9 +3,8 @@ using System.Globalization;
 
 namespace ClientLib.Authentication
 {
-    public interface IAccountOperationManager
+    public interface IAccountOperationManager : ILoginRequester
     {
-        event EventHandler? LoginRequired;
         string? LoggedInEmail { get; }
         Task<LoginResponse> Login(string email, string password);
         void Logout();

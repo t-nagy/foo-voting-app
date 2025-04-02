@@ -13,11 +13,8 @@ using System.Threading.Tasks;
 
 namespace ClientLib.Authentication
 {
-    public class BearerSessionManager : ISessionManager
+    public class BearerSessionManager : AdminApiCaller, ISessionManager
     {
-        private const string server_addr = "https://localhost:7119";
-        private HttpClient client = new HttpClient();
-
         public string? LoggedInEmail { get; private set; }
         private string? AuthenticationToken { get; set; }
         private string? RefreshToken { get; set; }
@@ -37,12 +34,8 @@ namespace ClientLib.Authentication
 
         public event EventHandler<EventArgs>? LoginRequiredEvent;
 
-        public BearerSessionManager()
+        public BearerSessionManager() : base()
         {
-            client.BaseAddress = new Uri(server_addr);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task<string?> GetAuthenticationToken()
@@ -61,7 +54,7 @@ namespace ClientLib.Authentication
 
         public async Task<LoginResponse> StartNewSession(string email, string password)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("/login", new { email, password });
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/login", new { email, password });
             if (!response.IsSuccessStatusCode)
             {
                 // TODO - Replace with error handling
@@ -97,7 +90,7 @@ namespace ClientLib.Authentication
 
         private async Task<bool> RefreshAuthenticationToken()
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("/login", RefreshToken);
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/refresh", new { RefreshToken });
             if (!response.IsSuccessStatusCode)
             {
                 // TODO - Replace with error handling

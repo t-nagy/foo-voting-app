@@ -9,10 +9,8 @@ using System.Threading.Tasks;
 
 namespace ClientLib.Authentication
 {
-    public class ApiAccountOperationManager : ApiCaller, IAccountOperationManager
+    public class ApiAccountOperationManager : AdminApiAuthCaller, IAccountOperationManager
     {
-        private const string server_addr = "https://localhost:7119";
-        private HttpClient client = new HttpClient();
 
         public string? LoggedInEmail
         {
@@ -21,10 +19,6 @@ namespace ClientLib.Authentication
 
         public ApiAccountOperationManager(ISessionManager sessionManager) : base(sessionManager)
         {
-            client.BaseAddress = new Uri(server_addr);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task<LoginResponse> Login(string email, string password)
@@ -39,7 +33,7 @@ namespace ClientLib.Authentication
 
         public async Task<string?> Register(string email, string password)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("/register", new { email, password });
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/register", new { email, password });
             if (response.IsSuccessStatusCode)
             {
                 return null;
@@ -54,20 +48,20 @@ namespace ClientLib.Authentication
 
         public async Task<bool> ResendEmailConfirmation(string email)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("/resendConfirmationEmail", new { email });
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/resendConfirmationEmail", new { email });
             return response.IsSuccessStatusCode;
 
         }
 
         public async Task<bool> ForgotPassword(string email)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("/forgotPassword", new { email });
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/forgotPassword", new { email });
             return response.IsSuccessStatusCode;
         }
 
         public async Task<string?> ResetPassword(string email, string resetCode, string newPassword)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("/resetPassword", new { email, resetCode, newPassword });
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/resetPassword", new { email, resetCode, newPassword });
             if (response.IsSuccessStatusCode)
             {
                 return null;
@@ -84,8 +78,8 @@ namespace ClientLib.Authentication
         {
             string? token = await _sessionManager.GetAuthenticationToken();
             if (token == null) { return "User login required!"; }
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            HttpResponseMessage response = await client.PostAsJsonAsync("/manage/info", new { oldPassword, newPassword });
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            HttpResponseMessage response = await _client.PostAsJsonAsync("/manage/info", new { oldPassword, newPassword });
             if (response.IsSuccessStatusCode)
             {
                 return null;
