@@ -39,7 +39,7 @@
                     Margin="0 10 0 0"
                     Content="Log in"
                     IsDefault="True"/>
-                <TextBlock Foreground="Red" Text="{Binding ErrorText}" TextWrapping="Wrap" Margin="0 10" Visibility="{Binding Path=IsErrorTextVisible, Converter={StaticResource visConverter}}"/>
+                <TextBlock Foreground="Red" Text="{Binding ErrorText}" FontStyle="Italic" TextWrapping="Wrap" Margin="0 10" Visibility="{Binding Path=IsErrorTextVisible, Converter={StaticResource visConverter}}"/>
                 <Button Command="{Binding ResendEmailCommand}" IsEnabled="{Binding ButtonsEnabled}" Visibility="{Binding Path=IsEmailResendVisible, Converter={StaticResource visConverter}}" FontSize="{DynamicResource FontSize-Normal}" Width="200">Resend confirmation email</Button>
                 <Button Command="{Binding ForgotPasswordCommand}" IsEnabled="{Binding ButtonsEnabled}" Visibility="{Binding Path=IsForgotPasswordVisible, Converter={StaticResource visConverter}}" FontSize="{DynamicResource FontSize-Normal}" Width="200">Reset password</Button>
 

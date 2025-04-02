@@ -4,11 +4,91 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:WPFUI.View"
+      xmlns:toolkit="http://schemas.xceed.com/wpf/toolkit" 
+      xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="700" d:DesignWidth="1000"
       Title="CreatePollPage" Style="{StaticResource DefaultPage}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="visConverter"/>
+    </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <DockPanel VerticalAlignment="Top">
+
+                <Label DockPanel.Dock="Left" Content="Create New Poll" Margin="10" Style="{StaticResource TitleLabel}" />
+                <Button Command="{Binding AccountSettingsCommand}" Style="{StaticResource IconButton}" Height="60" Width="80" Padding="0 0 5 0" DockPanel.Dock="Right" HorizontalAlignment="Right" BorderThickness="0" ToolTip="Account settings">
+                    <Path Fill="{StaticResource DefaultForegroundColor}" Stroke="{StaticResource DefaultForegroundColor}" Data="M31.278,25.525C34.144,23.332,36,19.887,36,16c0-6.627-5.373-12-12-12c-6.627,0-12,5.373-12,12
+                    c0,3.887,1.856,7.332,4.722,9.525C9.84,28.531,5,35.665,5,44h38C43,35.665,38.16,28.531,31.278,25.525z M16,16c0-4.411,3.589-8,8-8
+                    s8,3.589,8,8c0,4.411-3.589,8-8,8S16,20.411,16,16z M24,28c6.977,0,12.856,5.107,14.525,12H9.475C11.144,33.107,17.023,28,24,28z"/>
+                </Button>
+                <Button Command="{Binding CancelCommand}" DockPanel.Dock="Right" Content="CancelButton" Style="{StaticResource IconButton}" Height="60" Width="80" HorizontalAlignment="Right" BorderThickness="0" ToolTip="Cancel"/>
+            </DockPanel>
+            <Rectangle DockPanel.Dock="Bottom" Stroke="Black" Height="2" StrokeThickness="1" Margin="10 0 10 20" />
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="20 0">
+            <TextBlock FontSize="{DynamicResource FontSize-Normal}" FontStyle="Italic" TextWrapping="Wrap" Text="You can create a new poll here. Please make sure you have added all poll options as there will be no way to add any more after the poll is created. In case of a private poll you can add participants or share the code after the poll has been created." />
+            <TextBlock Text="{Binding ErrorText}" Visibility="{Binding IsErrorTextVisible, Converter={StaticResource visConverter}}" Margin="0 10 0 0" Foreground="Red" FontSize="{DynamicResource FontSize-Normal}" FontStyle="Italic" TextWrapping="Wrap" />
+            <Label Content="Title" Margin="0 10 0 0" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" />
+            <TextBox Text="{Binding Path=Title, UpdateSourceTrigger=PropertyChanged}" Height="30" VerticalAlignment="Top" Padding="5" VerticalContentAlignment="Center"/>
+            <Label Content="Descripton (Optional)" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" />
+            <TextBox Text="{Binding Path=Description, UpdateSourceTrigger=PropertyChanged}" MaxHeight="100"  VerticalAlignment="Top" Padding="5" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+            <StackPanel Orientation="Horizontal" >
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Voting period end" Width="240" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" />
+                    <DatePicker SelectedDate="{Binding Path=VoteCollectionEnd, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding Path=DisplayDateStartCollection, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="20 0" Width="240">
+                    <Label Content="Validation period end" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" />
+                    <DatePicker SelectedDate="{Binding Path=VoteValidationEnd, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" DisplayDateStart="{Binding Path=DisplayDateStartValidation, Mode=OneWay}"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Width="240">
+                    <Label Content="Allow public voting" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" />
+                    <CheckBox Content="Enable" IsChecked="{Binding Path=IsPublic, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" FontSize="{DynamicResource FontSize-Large}"/>
+                </StackPanel>
+            </StackPanel>
+            <Label Content="Add poll options" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Height="30" Grid.Column="0" HorizontalContentAlignment="Stretch" VerticalAlignment="Top" Padding="5" Text="{Binding Path=AddOptionText, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center">
+                    <behaviors:Interaction.Triggers>
+                        <behaviors:KeyTrigger Key="Return">
+                            <behaviors:InvokeCommandAction Command="{Binding AddOptionCommand}"/>
+                        </behaviors:KeyTrigger>
+                    </behaviors:Interaction.Triggers>
+                </TextBox>
+
+                <Button Command="{Binding AddOptionCommand}" Content="ADD" Style="{StaticResource IconButton}" Grid.Column="1" 
+                        HorizontalAlignment="Stretch"/>
+            </Grid>
+        </StackPanel>
+
+        <ListBox Margin="20" Grid.Row="2" VerticalAlignment="Top" MinHeight="60" ItemsSource="{Binding OptionsList}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="30"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Height="25" VerticalContentAlignment="Center" Content="{Binding OptionText}"/>
+                        <Button Grid.Column="1" Command="{Binding DataContext.DeleteOptionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}" CommandParameter="{Binding}" Content="DEL" Style="{StaticResource IconButton}" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         
+        <Button Command="{Binding CreatePollCommand}" Grid.Row="3" Margin="0 0 0 20" Content="Create Poll" Width="300" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold"/>
     </Grid>
 </Page>

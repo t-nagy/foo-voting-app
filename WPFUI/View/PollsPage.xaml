@@ -24,6 +24,7 @@
 		                    c0,3.887,1.856,7.332,4.722,9.525C9.84,28.531,5,35.665,5,44h38C43,35.665,38.16,28.531,31.278,25.525z M16,16c0-4.411,3.589-8,8-8
 		                    s8,3.589,8,8c0,4.411-3.589,8-8,8S16,20.411,16,16z M24,28c6.977,0,12.856,5.107,14.525,12H9.475C11.144,33.107,17.023,28,24,28z"/>
                 </Button>
+                <Button Command="{Binding CreatePollCommand}" DockPanel.Dock="Right" Content="CancelButton" Style="{StaticResource IconButton}" Height="60" Width="80" HorizontalAlignment="Right" BorderThickness="0" ToolTip="Cancel"/>
             </DockPanel>
             <Rectangle DockPanel.Dock="Bottom" Stroke="Black" Height="2" StrokeThickness="1" Margin="10 0 10 20" />
         </StackPanel>

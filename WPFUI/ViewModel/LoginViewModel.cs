@@ -53,7 +53,7 @@ namespace WPFUI.ViewModel
             });
         }
 
-        private string _emailAddress = string.Empty;
+        private string _emailAddress = "nagytomi1000@gmail.com"; //string.Empty;
 
         public string EmailAddress
         {
@@ -105,7 +105,7 @@ namespace WPFUI.ViewModel
         private async void Login(string password)
         {
             ButtonsEnabled = false;
-            LoginResponse response = await _accountOperationManager.Login(EmailAddress, password);
+            LoginResponse response = await _accountOperationManager.Login(EmailAddress, "String1!" /*password*/);
             if (response == LoginResponse.Success)
             {
                 ShowPollsPage?.Invoke(this, EventArgs.Empty);

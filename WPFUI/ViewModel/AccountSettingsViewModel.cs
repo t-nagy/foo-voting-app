@@ -13,9 +13,9 @@ namespace WPFUI.ViewModel
     {
         private readonly IAccountOperationManager _accountManager;
 
-        public DelegateCommand ChangePasswordCommand { get; set; }
-        public DelegateCommand CloseAccountSettingsCommand { get; set; }
-        public DelegateCommand LogoutCommand { get; set; }
+        public DelegateCommand ChangePasswordCommand { get; private set; }
+        public DelegateCommand CloseAccountSettingsCommand { get; private set; }
+        public DelegateCommand LogoutCommand { get; private set; }
 
 
         public event EventHandler? CloseAccountSettingsPageEvent;

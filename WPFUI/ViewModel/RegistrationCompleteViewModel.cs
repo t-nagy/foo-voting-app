@@ -8,7 +8,7 @@ namespace WPFUI.ViewModel
 {
     class RegistrationCompleteViewModel : ViewModelBase
     {
-        public DelegateCommand ShowLoginCommand { get; set; }
+        public DelegateCommand ShowLoginCommand { get; private set; }
 
         public event EventHandler<bool>? ShowLoginPage;
 

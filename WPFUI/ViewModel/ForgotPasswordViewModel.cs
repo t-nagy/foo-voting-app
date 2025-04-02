@@ -15,7 +15,7 @@ namespace WPFUI.ViewModel
         private readonly IAccountOperationManager _accountOperationManager;
 
         public DelegateCommand RequestResetTokenCommand { get; private set; }
-        public DelegateCommand ResetPasswordCommand { get; set; }
+        public DelegateCommand ResetPasswordCommand { get; private set; }
         public DelegateCommand LoginCommand { get; private set; }
 
         public event EventHandler<bool>? ShowLoginPage;
