@@ -66,5 +66,6 @@
     <Build Include="Stored Procedures\uspPoll_Insert.sql" />
     <Build Include="Stored Procedures\uspParticipant_Insert.sql" />
     <Build Include="Stored Procedures\uspPoll_GetById.sql" />
+    <Build Include="Tables\PollOption.sql" />
   </ItemGroup>
 </Project>
