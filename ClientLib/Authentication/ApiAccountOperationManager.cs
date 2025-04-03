@@ -33,7 +33,16 @@ namespace ClientLib.Authentication
 
         public async Task<string?> Register(string email, string password)
         {
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/register", new { email, password });
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/register", new { email, password });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             if (response.IsSuccessStatusCode)
             {
                 return null;
@@ -48,20 +57,46 @@ namespace ClientLib.Authentication
 
         public async Task<bool> ResendEmailConfirmation(string email)
         {
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/resendConfirmationEmail", new { email });
-            return response.IsSuccessStatusCode;
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/resendConfirmationEmail", new { email });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
 
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> ForgotPassword(string email)
         {
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/forgotPassword", new { email });
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/forgotPassword", new { email });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             return response.IsSuccessStatusCode;
         }
 
         public async Task<string?> ResetPassword(string email, string resetCode, string newPassword)
         {
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/resetPassword", new { email, resetCode, newPassword });
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/resetPassword", new { email, resetCode, newPassword });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             if (response.IsSuccessStatusCode)
             {
                 return null;
@@ -79,7 +114,16 @@ namespace ClientLib.Authentication
             string? token = await _sessionManager.GetAuthenticationToken();
             if (token == null) { return "User login required!"; }
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/manage/info", new { oldPassword, newPassword });
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/manage/info", new { oldPassword, newPassword });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             if (response.IsSuccessStatusCode)
             {
                 return null;

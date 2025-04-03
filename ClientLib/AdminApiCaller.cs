@@ -12,6 +12,13 @@ namespace ClientLib
         protected readonly HttpClient _client;
         protected readonly string _baseAdress = "https://localhost:7119";
 
+        private const string _defaultServerUnreachableExceptionMessage = "Communication with the server failed. Please check your internet connection!";
+
+        protected string DefaultServerUnreachableExceptionMessage
+        {
+            get { return _defaultServerUnreachableExceptionMessage; }
+        }
+
         public AdminApiCaller()
         {
             _client = new HttpClient();

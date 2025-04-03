@@ -22,7 +22,16 @@ namespace ClientLib
             if (token == null) { return null; }
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            HttpResponseMessage response = await _client.PostAsJsonAsync<PollModel>("/poll", poll);
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync<PollModel>("/poll", poll);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<PollModel?>();

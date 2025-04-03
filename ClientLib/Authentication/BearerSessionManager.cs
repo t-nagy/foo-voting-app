@@ -54,10 +54,18 @@ namespace ClientLib.Authentication
 
         public async Task<LoginResponse> StartNewSession(string email, string password)
         {
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/login", new { email, password });
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/login", new { email, password });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             if (!response.IsSuccessStatusCode)
             {
-                // TODO - Replace with error handling
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
                     string responseJsonString = await response.Content.ReadAsStringAsync();
@@ -90,7 +98,16 @@ namespace ClientLib.Authentication
 
         private async Task<bool> RefreshAuthenticationToken()
         {
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/refresh", new { RefreshToken });
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.PostAsJsonAsync("/refresh", new { RefreshToken });
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
             if (!response.IsSuccessStatusCode)
             {
                 // TODO - Replace with error handling
