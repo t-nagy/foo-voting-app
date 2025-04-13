@@ -1,4 +1,5 @@
-﻿using ClientLib.Authentication;
+﻿using ClientLib;
+using ClientLib.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -114,7 +115,20 @@ namespace WPFUI.ViewModel
         private async void RequestResetToken()
         {
             ButtonsEnabled = false;
-            if (await _accountOperationManager.ForgotPassword(EmailAddress))
+            bool result;
+            try
+            {
+                result = await _accountOperationManager.ForgotPassword(EmailAddress);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                ButtonsEnabled = true;
+                return;
+            }
+
+            if (result)
             {
                 ForgotNoticeText = "An email containing your reset code has been sent to your email adress.";
                 ForgotNoticeColor = "Green";
@@ -138,7 +152,19 @@ namespace WPFUI.ViewModel
                 return;
             }
 
-            string? errors = await _accountOperationManager.ResetPassword(EmailAddress, ResetToken.Trim(), password);
+            string? errors;
+            try
+            {
+                errors = await _accountOperationManager.ResetPassword(EmailAddress, ResetToken.Trim(), password);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                ButtonsEnabled = true;
+                return;
+            }
+
             if (errors == null)
             {
                 IsErrorTextVisible = false;

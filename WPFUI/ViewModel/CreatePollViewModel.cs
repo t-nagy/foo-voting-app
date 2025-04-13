@@ -15,19 +15,27 @@ namespace WPFUI.ViewModel
     {
         private readonly IPollManager _pollManager;
 
-        public DelegateCommand CancelCommand { get; private set; }
+        public DelegateCommand AccountSettingsCommand { get; private set; }
+        public DelegateCommand CloseCommand { get; private set; }
         public DelegateCommand AddOptionCommand { get; private set; }
         public DelegateCommand DeleteOptionCommand { get; private set; }
         public DelegateCommand CreatePollCommand { get; set; }
 
 
+        public event EventHandler? ShowAccountSettingsPage;
         public event EventHandler? CancelPollCreation;
+        public event EventHandler<PollModel>? PollCreated;
 
         public CreatePollViewModel(IPollManager pollManager)
         {
             _pollManager = pollManager;
 
-            CancelCommand = new DelegateCommand((param) =>
+            AccountSettingsCommand = new DelegateCommand((param) =>
+            {
+                ShowAccountSettingsPage?.Invoke(this, EventArgs.Empty);
+            });
+
+            CloseCommand = new DelegateCommand((param) =>
             {
                 CancelPollCreation?.Invoke(this, EventArgs.Empty);
             });
@@ -143,6 +151,14 @@ namespace WPFUI.ViewModel
             set { _errorText = value; OnPropertyChanged(); }
         }
 
+        private bool _isCreateButtonEnabled = true;
+
+        public bool IsCreateButtonEnabled
+        {
+            get { return _isCreateButtonEnabled; }
+            set { _isCreateButtonEnabled = value; OnPropertyChanged(); }
+        }
+
         #endregion
 
         private async void CreatePoll()
@@ -156,8 +172,23 @@ namespace WPFUI.ViewModel
             };
 
             poll.Description = !string.IsNullOrWhiteSpace(this.Description) ? this.Description : null;
+            poll.PollOptions = OptionsList.ToList();
 
-            PollModel? pollWithId = await _pollManager.CreatePoll(poll);
+            IsCreateButtonEnabled = false;
+            PollModel? pollWithId;
+            try
+            {
+                pollWithId = await _pollManager.CreatePoll(poll);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                IsCreateButtonEnabled = true;
+                return;
+            }
+            IsCreateButtonEnabled = true;
+
             if (pollWithId == null)
             {
                 ErrorText = "An unknown error has occoured while trying to create your poll. Please try again!\n";
@@ -165,6 +196,7 @@ namespace WPFUI.ViewModel
                 return;
             }
             Console.WriteLine(poll);
+            PollCreated?.Invoke(this, pollWithId);
         }
 
         private bool ValidateAddOption()
@@ -181,6 +213,11 @@ namespace WPFUI.ViewModel
                 ErrorText += "Poll options must be at most 200 characters!\n";
                 isValid = false;
             }
+            if (OptionsList.Any(x => x.OptionText == AddOptionText))
+            {
+                ErrorText += "You have already added this poll option!\n";
+                isValid = false;
+            }
 
             IsErrorTextVisible = !isValid;
             return isValid;
@@ -195,9 +232,9 @@ namespace WPFUI.ViewModel
                 ErrorText += "Poll title cannot be empty!\n";
                 isValid = false;
             }
-            if (Title.Length < 4 || Title.Length > 100)
+            if (Title.Length < 4 || Title.Length > 200)
             {
-                ErrorText += "Title must be between 4 and 100 characters!\n";
+                ErrorText += "Title must be between 4 and 200 characters!\n";
                 isValid = false;
             }
             if (Description.Length > 500)

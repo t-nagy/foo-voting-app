@@ -1,4 +1,5 @@
-﻿using ClientLib.Authentication;
+﻿using ClientLib;
+using ClientLib.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,7 +106,19 @@ namespace WPFUI.ViewModel
         private async void Login(string password)
         {
             ButtonsEnabled = false;
-            LoginResponse response = await _accountOperationManager.Login(EmailAddress, "String1!" /*password*/);
+            LoginResponse response;
+            try
+            {
+                response = await _accountOperationManager.Login(EmailAddress, "String1!" /*password*/);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                ButtonsEnabled = true;
+                return;
+            }
+
             if (response == LoginResponse.Success)
             {
                 ShowPollsPage?.Invoke(this, EventArgs.Empty);
@@ -119,7 +132,19 @@ namespace WPFUI.ViewModel
 
         private async void ResendEmailConfirmation()
         {
-            if (await _accountOperationManager.ResendEmailConfirmation(EmailAddress))
+            bool resendResult;
+            try
+            {
+                resendResult = await _accountOperationManager.ResendEmailConfirmation(EmailAddress);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                return;
+            }
+
+            if (resendResult)
             {
                 ErrorText = "A new confirmation link has been sent to your email address.";
                 IsEmailResendVisible = false;

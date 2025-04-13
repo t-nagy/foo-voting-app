@@ -20,6 +20,11 @@ namespace ClientLib
             _sessionManager.LoginRequiredEvent += PropagateLoginRequiredEvent;
         }
 
+        public string? LoggedInEmail
+        {
+            get { return _sessionManager.LoggedInEmail; }
+        }
+
         private void PropagateLoginRequiredEvent(object? sender, EventArgs e)
         {
             LoginRequired?.Invoke(sender, e);

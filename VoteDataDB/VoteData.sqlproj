@@ -62,10 +62,15 @@
   <ItemGroup>
     <Build Include="Tables\Poll.sql" />
     <Build Include="Tables\Participant.sql" />
-    <Build Include="Stored Procedures\uspPoll_GetAll.sql" />
     <Build Include="Stored Procedures\uspPoll_Insert.sql" />
     <Build Include="Stored Procedures\uspParticipant_Insert.sql" />
     <Build Include="Stored Procedures\uspPoll_GetById.sql" />
     <Build Include="Tables\PollOption.sql" />
+    <Build Include="Stored Procedures\uspPollOption_Insert.sql" />
+    <Build Include="Stored Procedures\uspParticipant_GetByPollAndUserId.sql" />
+    <Build Include="Stored Procedures\uspPoll_GetMinimal.sql" />
+    <Build Include="Stored Procedures\uspPollOption_GetByPollId.sql" />
+    <Build Include="Stored Procedures\uspParticipant_GetByPoll.sql" />
+    <Build Include="Stored Procedures\uspPoll_GetByJoinCode.sql" />
   </ItemGroup>
 </Project>

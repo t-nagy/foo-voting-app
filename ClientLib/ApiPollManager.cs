@@ -16,6 +16,62 @@ namespace ClientLib
         {
         }
 
+        public async Task<IEnumerable<PollModel>?> GetAllPollsMinimal()
+        {
+            string? token = await _sessionManager.GetAuthenticationToken();
+            if (token == null) { return null; }
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.GetAsync("/poll");
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<IEnumerable<PollModel>?>();
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public async Task<PollModel?> GetPollById(int pollId)
+        {
+            string? token = await _sessionManager.GetAuthenticationToken();
+            if (token == null) { return null; }
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _client.GetAsync($"/poll?id={pollId}");
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<IEnumerable<PollModel>?>();
+                if (result != null)
+                {
+                    return result.FirstOrDefault();
+                }
+            }
+
+            return null;
+        }
+
         public async Task<PollModel?> CreatePoll(PollModel poll)
         {
             string? token = await _sessionManager.GetAuthenticationToken();
@@ -34,10 +90,14 @@ namespace ClientLib
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<PollModel?>();
-                if (result != null)
+                try
                 {
+                    var result = await response.Content.ReadFromJsonAsync<PollModel?>();
                     return result;
+                }
+                catch (Exception)
+                {
+                    return null;
                 }
             }
 

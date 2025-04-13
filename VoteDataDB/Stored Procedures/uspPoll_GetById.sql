@@ -1,11 +1,10 @@
-﻿CREATE PROCEDURE [dbo].[uspGetPoll_ById]
-	@userId NVARCHAR(450),
-	@pollId int
+﻿CREATE PROCEDURE [dbo].[uspPoll_GetById]
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
 
 	SELECT * 
-		FROM [dbo].[Poll] INNER JOIN [dbo].[Participant] ON [PollId] = Id
-		WHERE ([UserId] = @userId OR [IsPublic] = 1) AND [Id] = @pollId;
+	FROM [dbo].[Poll]
+	WHERE [Id] = @Id;
 END;

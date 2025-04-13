@@ -9,6 +9,7 @@ namespace SharedLibrary.Models
     public class OptionModel
     {
         public int Id { get; set; }
+        public int PollId { get; set; }
         public required string OptionText { get; set; }
     }
 }

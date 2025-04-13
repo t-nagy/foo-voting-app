@@ -7,9 +7,13 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PollsPage" Style="{StaticResource DefaultPage}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="visConverter"/>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -24,12 +28,19 @@
 		                    c0,3.887,1.856,7.332,4.722,9.525C9.84,28.531,5,35.665,5,44h38C43,35.665,38.16,28.531,31.278,25.525z M16,16c0-4.411,3.589-8,8-8
 		                    s8,3.589,8,8c0,4.411-3.589,8-8,8S16,20.411,16,16z M24,28c6.977,0,12.856,5.107,14.525,12H9.475C11.144,33.107,17.023,28,24,28z"/>
                 </Button>
-                <Button Command="{Binding CreatePollCommand}" DockPanel.Dock="Right" Content="CancelButton" Style="{StaticResource IconButton}" Height="60" Width="80" HorizontalAlignment="Right" BorderThickness="0" ToolTip="Cancel"/>
+                <Button Command="{Binding CreatePollCommand}" DockPanel.Dock="Right" Style="{StaticResource IconButton}" Height="60" Padding="15" Width="80" HorizontalAlignment="Right" BorderThickness="0" ToolTip="Create new poll">
+                    <Path Data="M6 12H18M12 6V18" Stroke="#000000" StrokeThickness="2" StrokeStartLineCap="Round" StrokeLineJoin="Round" Stretch="Uniform"/>
+                </Button>
+                <Button Command="{Binding JoinWithCodeCommand}" DockPanel.Dock="Right" Style="{StaticResource IconButton}" BorderThickness="0" Height="60" Padding="15" Width="80" HorizontalAlignment="Right" ToolTip="Join poll with code">
+                    <Path Data="M10 4L7 20M17 4L14 20M5 8H20M4 16H19" Stroke="#000000" StrokeThickness="2" StrokeStartLineCap="Round" Stretch="Uniform"/>
+                </Button>
             </DockPanel>
             <Rectangle DockPanel.Dock="Bottom" Stroke="Black" Height="2" StrokeThickness="1" Margin="10 0 10 20" />
         </StackPanel>
-        <Label Grid.Row="1" Content="Filters" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" Margin="20 0 0 0"/>
-        <Grid Grid.Row="2">
+
+        <TextBlock Grid.Row="1" Text="{Binding ErrorText}" Visibility="{Binding IsErrorTextVisible, Converter={StaticResource visConverter}}" Margin="0 0 0 10" Foreground="Red" FontSize="{DynamicResource FontSize-Normal}" FontStyle="Italic" TextWrapping="Wrap" />
+        <Label Grid.Row="2" Content="Filters" FontSize="{DynamicResource FontSize-Larger}" FontWeight="Bold" Margin="20 0 0 0"/>
+        <Grid Grid.Row="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -43,38 +54,37 @@
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="Creator" FontSize="{DynamicResource FontSize-Large}" Margin="20 0 10 0"/>
-            <TextBox Grid.Row="1" Grid.Column="0" Height="30" Margin="20 0 10 0" Padding="5" FontSize="{DynamicResource FontSize-Normal}" VerticalContentAlignment="Center"/>
+            <TextBox Text="{Binding Path=OwnerFilter, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="0" Height="30" Margin="20 0 10 0" Padding="5" FontSize="{DynamicResource FontSize-Normal}" VerticalContentAlignment="Center"/>
 
             <Label Grid.Row="0" Grid.Column="1" Content="Title" FontSize="{DynamicResource FontSize-Large}" Margin="0 0 10 0"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Height="30" Margin="0 0 10 0" Padding="5" FontSize="{DynamicResource FontSize-Normal}" VerticalContentAlignment="Center"/>
+            <TextBox Text="{Binding Path=TitleFilter, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Height="30" Margin="0 0 10 0" Padding="5" FontSize="{DynamicResource FontSize-Normal}" VerticalContentAlignment="Center"/>
 
             <Label Grid.Row="0" Grid.Column="2" Content="Status" FontSize="{DynamicResource FontSize-Large}" Margin="0 0 10 0"/>
-            <ComboBox Grid.Row="1" Grid.Column="2" />
+            <ComboBox Grid.Row="1" Grid.Column="2" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatusOption}" VerticalContentAlignment="Center"/>
 
             <Label Grid.Row="0" Grid.Column="3" Content="Public Votes" FontSize="{DynamicResource FontSize-Large}" Margin="0 0 10 0"/>
-            <CheckBox Grid.Row="1" Grid.Column="3" Content="Enabled" FontSize="{DynamicResource FontSize-Large}" VerticalContentAlignment="Center" Margin="10 0" />
+            <CheckBox IsChecked="{Binding AllowPublic}" Grid.Row="1" Grid.Column="3" Content="Enabled" FontSize="{DynamicResource FontSize-Large}" VerticalContentAlignment="Center" Margin="10 0" />
 
             <StackPanel Orientation="Vertical" Grid.Row="0" Grid.RowSpan="2" Grid.Column="4" VerticalAlignment="Center" Margin="0 0 20 0">
-                <Button  Style="{StaticResource IconButton}" Width="50" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" ToolTip="Clear all filters">
+                <Button Command="{Binding ClearFiltersCommand}" Style="{StaticResource IconButton}" Width="50" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" ToolTip="Clear all filters">
                     <Image Source="/Assets/clear-filter-svgrepo-com.png"/>
                 </Button>
-                <Button Style="{StaticResource IconButton}" Width="50" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom"  ToolTip="Search" IsDefault="True">
+                <Button Command="{Binding RefreshCommand}" Style="{StaticResource IconButton}" Width="50" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom"  ToolTip="Search" IsDefault="True">
                     <Grid>
-                        <Path Data="M17 17L21 21" Stroke="Black" StrokeThickness="2" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
-                        <Path Data="M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" Stroke="Black" StrokeThickness="2"/>
+                        <Path Data="M21 12C21 16.9706 16.9706 21 12 21C9.69494 21 7.59227 20.1334 6 18.7083L3 16M3 12C3 7.02944 7.02944 3 12 3C14.3051 3 16.4077 3.86656 18 5.29168L21 8M3 21V16M3 16H8M21 3V8M21 8H16" Stroke="#000000" StrokeThickness="2" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
                     </Grid>
                 </Button>
             </StackPanel>
         </Grid>
-        <DataGrid Grid.Row="3" Margin="20">
+        <DataGrid Grid.Row="4" Margin="20" ItemsSource="{Binding Polls}" AutoGenerateColumns="False" MinRowHeight="20" SelectedItem="{Binding SelectedPoll}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Creator" Width="*"/>
-                <DataGridTextColumn Header="Title" Width="*"/>
-                <DataGridTextColumn Header="Created Date" Width="*"/>
-                <DataGridTextColumn Header="End of voting" Width="*"/>
-                <DataGridTextColumn Header="End of validation" Width="*"/>
-                <DataGridTextColumn Header="Status" Width="*"/>
-                <DataGridTextColumn Header="Public" Width="*" Visibility="Collapsed"/>
+                <DataGridTextColumn Header="Creator" Width="*" Binding="{Binding OwnerName}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Title" Width="*" Binding="{Binding Title}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Created Date" Width="140" Binding="{Binding CreatedDate}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="End of voting" Width="140" Binding="{Binding VoteCollectionEndDate}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="End of validation" Width="140" Binding="{Binding VoteValidationEndDate}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Status" Width="100" Binding="{Binding Status}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Public" Width="50" Binding="{Binding IsPublic}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

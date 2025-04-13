@@ -1,4 +1,5 @@
-﻿using ClientLib.Authentication;
+﻿using ClientLib;
+using ClientLib.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +82,19 @@ namespace WPFUI.ViewModel
                 return;
             }
 
-            string? errors = await _accountOperations.Register(EmailAddress!, password!);
+            string? errors;
+            try
+            {
+                errors = await _accountOperations.Register(EmailAddress!, password!);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                ButtonsEnabled = true;
+                return;
+            }
+
             if (errors == null)
             {
                 RegistrationComplete?.Invoke(this, EventArgs.Empty);

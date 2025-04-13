@@ -1,5 +1,6 @@
 ﻿using ClientLib;
 using ClientLib.Authentication;
+using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace WPFUI.ViewModel
         #region Private fields
         private readonly IAccountOperationManager _accountManager;
         private readonly IPollManager _pollManager;
+        private readonly IParticipantManager _participantManager;
         private Page? _returnPage;
         #endregion
 
@@ -47,15 +49,25 @@ namespace WPFUI.ViewModel
         private readonly AccountSettingsPage _accountSettingsPage;
         private AccountSettingsViewModel? _accountSettingsViewModel;
 
-        private readonly CreatePollPage _createPollPage;
+        private CreatePollPage _createPollPage;
         private CreatePollViewModel? _createPollViewModel;
+
+        private readonly PollDetailPage _pollDetailPage;
+        private PollDetailViewModel? _pollDetailViewModel;
+
+        private readonly ParticipantsPage _participantsPage;
+        private ParticipantsViewModel? _participantsViewModel;
+
+        private readonly JoinWithCodePage _joinWithCodePage;
+        private JoinWithCodeViewModel? _joinWithCodeViewModel;
         #endregion
 
 
-        public MainViewModel(IAccountOperationManager accountManager, IPollManager pollManager)
+        public MainViewModel(IAccountOperationManager accountManager, IPollManager pollManager, IParticipantManager participantManager)
         {
             _accountManager = accountManager;
             _pollManager = pollManager;
+            _participantManager = participantManager;
             _accountManager.LoginRequired += LoginRequiredEvent;
             _pollManager.LoginRequired += LoginRequiredEvent;
 
@@ -66,8 +78,12 @@ namespace WPFUI.ViewModel
             _forgotPasswordPage = new ForgotPasswordPage();
             _accountSettingsPage = new AccountSettingsPage();
             _createPollPage = new CreatePollPage();
+            _pollDetailPage = new PollDetailPage();
+            _participantsPage = new ParticipantsPage();
+            _joinWithCodePage = new JoinWithCodePage();
 
             ShowLogin(true);
+            
         }
 
         private void ResetViewModels()
@@ -79,6 +95,9 @@ namespace WPFUI.ViewModel
             _forgotPasswordViewModel = null;
             _accountSettingsViewModel = null;
             _createPollViewModel = null;
+            _pollDetailViewModel = null;
+            _participantsViewModel = null;
+            _joinWithCodeViewModel = null;
         }
 
         #region Show page methods
@@ -121,13 +140,12 @@ namespace WPFUI.ViewModel
 
         private void ShowPollsPage()
         {
-            if (_pollsViewModel == null)
-            {
-                _pollsViewModel = new PollsViewModel();
-                _pollsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
-                _pollsViewModel.ShowCreateNewPollPage += ShowCreatePollPageEvent;
-                _pollsPage.DataContext = _pollsViewModel;
-            }
+            _pollsViewModel = new PollsViewModel(_pollManager);
+            _pollsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
+            _pollsViewModel.ShowCreateNewPollPage += ShowCreatePollPageEvent;
+            _pollsViewModel.ShowJoinWithCodePage += ShowJoinWithCodePageEvent;
+            _pollsViewModel.ShowPollDetailPage += ShowPollDetailPageEvent;
+            _pollsPage.DataContext = _pollsViewModel;
 
             ActivePage = _pollsPage;
         }
@@ -148,15 +166,53 @@ namespace WPFUI.ViewModel
             _accountSettingsViewModel = new AccountSettingsViewModel(_accountManager);
             _accountSettingsViewModel.CloseAccountSettingsPageEvent += CloseAccountSettingsPageEvent;
             _accountSettingsPage.DataContext = _accountSettingsViewModel;
+
             ActivePage = _accountSettingsPage;
         }
 
         private void ShowCreatePollPage()
         {
+            // Date picker control refuses to reset like other controls so reloading ONLY this page is neccessary
+            _createPollPage = new CreatePollPage();
             _createPollViewModel = new CreatePollViewModel(_pollManager);
+            _createPollViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
             _createPollViewModel.CancelPollCreation += ShowPollsPageEvent;
+            _createPollViewModel.PollCreated += ShowPollDetailPageEvent;
             _createPollPage.DataContext = _createPollViewModel;
+
             ActivePage = _createPollPage;
+        }
+
+        private void ShowPollDetailPage(PollModel poll)
+        {
+            _pollDetailViewModel = new PollDetailViewModel(_pollManager, poll);
+            _pollDetailViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
+            _pollDetailViewModel.ClosePollDetails += ShowPollsPageEvent;
+            _pollDetailViewModel.ShowParticipants += ShowParticipantsPageEvent;
+            _pollDetailPage.DataContext = _pollDetailViewModel;
+
+            ActivePage = _pollDetailPage;
+        }
+
+        private void ShowParticipantsPage(PollModel poll)
+        {
+            _participantsViewModel = new ParticipantsViewModel(_participantManager, poll);
+            _participantsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
+            _participantsViewModel.ShowPollDetailPage += ShowPollDetailPageEvent;
+            _participantsPage.DataContext = _participantsViewModel;
+
+            ActivePage = _participantsPage;
+        }
+
+        private void ShowJoinWithCodePage()
+        {
+            _joinWithCodeViewModel = new JoinWithCodeViewModel(_participantManager);
+            _joinWithCodeViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
+            _joinWithCodeViewModel.ShowPollsPageEvent += ShowPollsPageEvent;
+            _joinWithCodeViewModel.PollJoinedEvent += ShowPollDetailPageEvent;
+            _joinWithCodePage.DataContext = _joinWithCodeViewModel;
+
+            ActivePage = _joinWithCodePage;
         }
         #endregion
 
@@ -210,6 +266,21 @@ namespace WPFUI.ViewModel
         private void ShowCreatePollPageEvent(object? sender, EventArgs e)
         {
             ShowCreatePollPage();
+        }
+
+        private void ShowPollDetailPageEvent(object? sender, PollModel e)
+        {
+            ShowPollDetailPage(e);
+        }
+
+        private void ShowParticipantsPageEvent(object? sender, PollModel e)
+        {
+            ShowParticipantsPage(e);
+        }
+
+        private void ShowJoinWithCodePageEvent(object? sender, EventArgs e)
+        {
+            ShowJoinWithCodePage();
         }
         #endregion
     }

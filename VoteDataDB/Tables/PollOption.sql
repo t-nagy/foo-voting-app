@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[PollOption]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY,
-	[Option] NVARCHAR(200) NOT NULL,
+	[OptionText] NVARCHAR(200) NOT NULL,
 	[PollId] INT NOT NULL
 )

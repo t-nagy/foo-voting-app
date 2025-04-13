@@ -1,4 +1,5 @@
-﻿using ClientLib.Authentication;
+﻿using ClientLib;
+using ClientLib.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +87,19 @@ namespace WPFUI.ViewModel
                 return;
             }
 
-            string? errors = await _accountManager.ChangePassword(oldPassword!, newPassword!);
+            string? errors;
+            try
+            {
+                errors = await _accountManager.ChangePassword(oldPassword!, newPassword!);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                PasswordChangeText = ex.Message;
+                PasswordChangeColor = "Red";
+                IsPasswordChangeTextVisible = true;
+                return;
+            }
+
             if (errors == null)
             {
                 PasswordChangeText = "Your password change was successful!";

@@ -8,7 +8,7 @@ namespace SharedLibrary.Models
 {
     public class ParticipantModel
     {
-        public required string UserId { get; set; }
+        public required string Username { get; set; }
         public int PollId { get; set; }
         public PollRole Role { get; set; }
         public bool HasVoted { get; set; }

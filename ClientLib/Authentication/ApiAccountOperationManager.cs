@@ -12,11 +12,6 @@ namespace ClientLib.Authentication
     public class ApiAccountOperationManager : AdminApiAuthCaller, IAccountOperationManager
     {
 
-        public string? LoggedInEmail
-        {
-            get { return _sessionManager.LoggedInEmail; }
-        }
-
         public ApiAccountOperationManager(ISessionManager sessionManager) : base(sessionManager)
         {
         }

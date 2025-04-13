@@ -49,7 +49,7 @@ namespace AdminAPI
             });
 
             builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme).Configure(options => {
-                options.BearerTokenExpiration = TimeSpan.FromSeconds(60);
+                options.BearerTokenExpiration = TimeSpan.FromSeconds(300);
             });
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
