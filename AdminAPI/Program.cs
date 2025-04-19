@@ -1,5 +1,6 @@
 
 using AdminAPI.Controllers.Data;
+using AdminAPI.DataAccess;
 using AdminAPI.Services;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -54,7 +55,14 @@ namespace AdminAPI
                 options.BearerTokenExpiration = TimeSpan.FromSeconds(300);
             });
 
+            builder.Services.AddTransient<KeyService>();
+            builder.Services.AddTransient<ConfigHelper>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddTransient<IPollOptionData, PollOptionSqlData>();
+            builder.Services.AddTransient<IParticipantData, ParticipantSqlData>();
+            builder.Services.AddTransient<IKeyData, KeySqlData>();
+            builder.Services.AddTransient<IPollData, PollSqlData>();
+
 
             var app = builder.Build();
 

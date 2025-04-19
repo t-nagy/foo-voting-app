@@ -5,13 +5,13 @@ using System.Data;
 
 namespace AdminAPI.DataAccess
 {
-    public class KeyData
+    public class KeySqlData : IKeyData
     {
         private readonly ConfigHelper _config;
 
-        public KeyData()
+        public KeySqlData(ConfigHelper config)
         {
-            _config = new ConfigHelper();
+            _config = config;
         }
 
         public async Task<IEnumerable<string>?> GetKeyByUser(string userId)

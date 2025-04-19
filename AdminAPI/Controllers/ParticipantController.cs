@@ -14,24 +14,25 @@ namespace AdminAPI.Controllers
     public class ParticipantController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IParticipantData _participantData;
 
-        public ParticipantController(UserManager<IdentityUser> userManager)
+        public ParticipantController(UserManager<IdentityUser> userManager, IParticipantData participantData)
         {
             _userManager = userManager;
+            _participantData = participantData;
         }
 
         [HttpGet(Name = "GetParticipants"), Authorize]
         public async Task<List<ParticipantModel>> Get(int pollId)
         {
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
-            ParticipantData data = new ParticipantData();
-            var userQuery = await data.GetParticipantByIdAndPoll(currUser!.Id, pollId);
+            var userQuery = await _participantData.GetParticipantByIdAndPoll(currUser!.Id, pollId);
             if (userQuery == null || userQuery?.Role != SharedLibrary.PollRole.Owner)
             {
                 Forbid();
             }
 
-            var participants = await data.GetParticipantsByPoll(pollId);
+            var participants = await _participantData.GetParticipantsByPoll(pollId);
             foreach (var p in participants)
             {
                 p.Username = (await _userManager.FindByIdAsync(p.Username))!.UserName!;
@@ -44,22 +45,21 @@ namespace AdminAPI.Controllers
         public async Task<IActionResult> Post(ParticipantModel participant)
         {
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
-            ParticipantData data = new ParticipantData();
-            var userQuery = await data.GetParticipantByIdAndPoll(currUser!.Id, participant.PollId);
+            var userQuery = await _participantData.GetParticipantByIdAndPoll(currUser!.Id, participant.PollId);
             if (userQuery == null || userQuery?.Role != SharedLibrary.PollRole.Owner)
             {
                 return Forbid();
             }
 
             var userToAdd = await _userManager.FindByEmailAsync(participant.Username);
-            if (userToAdd == null || await data.GetParticipantByIdAndPoll(userToAdd.Id, participant.PollId) != null)
+            if (userToAdd == null || await _participantData.GetParticipantByIdAndPoll(userToAdd.Id, participant.PollId) != null)
             {
                 return BadRequest();
             }
             participant.Username = userToAdd!.Id;
             participant.HasVoted = false;
             participant.Role = SharedLibrary.PollRole.Voter;
-            await data.SaveParticipant(participant);
+            await _participantData.SaveParticipant(participant);
 
             return Ok();
         }

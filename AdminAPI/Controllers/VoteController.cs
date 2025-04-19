@@ -19,32 +19,37 @@ namespace AdminAPI.Controllers
     public class VoteController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IPollData _pollData;
+        private readonly IParticipantData _participantData;
+        private readonly IKeyData _keyData;
+        private readonly KeyService _keyService;
 
-        public VoteController(UserManager<IdentityUser> userManager)
+        public VoteController(UserManager<IdentityUser> userManager, IPollData pollData, IParticipantData participantData, IKeyData keyData, KeyService keyService)
         {
             _userManager = userManager;
+            _pollData = pollData;
+            _participantData = participantData;
+            _keyData = keyData;
+            _keyService = keyService;
         }
 
         [HttpPost(Name = "ValidateBallot"), Authorize]
         public async Task<SignedBallotModel?> Post(SignedBallotModel blindedBallot)
         {
-            PollData data = new PollData();
-            PollModel? poll = await data.LoadPoll(blindedBallot.PollId);
+            PollModel? poll = await _pollData.LoadPoll(blindedBallot.PollId);
             if (poll == null)
             {
                 return null;
             }
 
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
-            ParticipantData participantData = new ParticipantData();
-            var participantQuery = await participantData.GetParticipantByIdAndPoll(currUser!.Id, blindedBallot.PollId);
+            var participantQuery = await _participantData.GetParticipantByIdAndPoll(currUser!.Id, blindedBallot.PollId);
             if ((participantQuery == null && !poll.IsPublic) || participantQuery != null && participantQuery.HasVoted)
             {
                 return null;
             }
 
-            KeyData keyData = new KeyData();
-            IEnumerable<string>? userKeys = await keyData.GetKeyByUser(currUser.Id);
+            IEnumerable<string>? userKeys = await _keyData.GetKeyByUser(currUser.Id);
             if (userKeys == null)
             {
                 // User did not register the key used for verification
@@ -67,13 +72,12 @@ namespace AdminAPI.Controllers
 
             if (poll.IsPublic && participantQuery == null)
             {
-                await participantData.SaveParticipant(new ParticipantModel { Username = currUser!.Id, HasVoted = true, PollId = poll.Id, Role = SharedLibrary.PollRole.Voter }); 
+                await _participantData.SaveParticipant(new ParticipantModel { Username = currUser!.Id, HasVoted = true, PollId = poll.Id, Role = SharedLibrary.PollRole.Voter }); 
             }
 
-            await participantData.ParticipantSetVoted(currUser!.Id, blindedBallot.PollId);
+            await _participantData.ParticipantSetVoted(currUser!.Id, blindedBallot.PollId);
 
-            KeyService keyService = new KeyService();
-            AsymmetricCipherKeyPair pair = DotNetUtilities.GetRsaKeyPair(keyService.RSA);
+            AsymmetricCipherKeyPair pair = DotNetUtilities.GetRsaKeyPair(_keyService.RSA);
             RsaEngine engine = new RsaEngine();
             engine.Init(true, pair.Private);
             var sa = engine.ProcessBlock(blindedBallot.Ballot, 0, blindedBallot.Ballot.Length);

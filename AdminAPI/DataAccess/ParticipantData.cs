@@ -8,13 +8,13 @@ using System.Data;
 
 namespace AdminAPI.DataAccess
 {
-    internal class ParticipantData
+    public class ParticipantSqlData : IParticipantData
     {
         private readonly ConfigHelper _config;
 
-        public ParticipantData()
+        public ParticipantSqlData(ConfigHelper config)
         {
-            _config = new ConfigHelper();
+            _config = config;
         }
 
         public async Task<ParticipantModel?> GetParticipantByIdAndPoll(string participantId, int pollId)

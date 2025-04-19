@@ -3,16 +3,16 @@ using System.Data;
 
 namespace AdminAPI.DataAccess
 {
-    internal class SqlDataAccess : IDisposable
+    public class SqlDataAccess : IDisposable
     {
         private readonly ConfigHelper _config;
         public IDbConnection? Connection { get; private set; }
         public IDbTransaction? Transaction { get; private set; }
         private bool _isClosed = false;
 
-        public SqlDataAccess()
+        public SqlDataAccess(ConfigHelper config)
         {
-            _config = new ConfigHelper();
+            _config = config;
         }
 
         public void StartTransaction(string connectionStringName)

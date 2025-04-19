@@ -12,10 +12,14 @@ namespace AdminAPI.Controllers
     public class JoinController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IPollData _pollData;
+        private readonly IParticipantData _participantData;
 
-        public JoinController(UserManager<IdentityUser> userManager)
+        public JoinController(UserManager<IdentityUser> userManager, IPollData pollData, IParticipantData participantData)
         {
             _userManager = userManager;
+            _pollData = pollData;
+            _participantData = participantData;
         }
 
         [HttpPost(Name = "JoinPoll"), Authorize]
@@ -28,16 +32,14 @@ namespace AdminAPI.Controllers
 
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
 
-            PollData pollData = new PollData();
-            PollModel? pollToJoin = await pollData.GetPollByJoinCode(inviteCode);
+            PollModel? pollToJoin = await _pollData.GetPollByJoinCode(inviteCode);
 
             if (pollToJoin == null)
             {
                 return null;
             }
 
-            ParticipantData participantData = new ParticipantData();
-            if ((await participantData.GetParticipantByIdAndPoll(currUser!.Id, pollToJoin.Id)) != null)
+            if ((await _participantData.GetParticipantByIdAndPoll(currUser!.Id, pollToJoin.Id)) != null)
             {
                 return null;
             }
@@ -50,7 +52,7 @@ namespace AdminAPI.Controllers
                 PollId = pollToJoin.Id
             };
 
-            await participantData.SaveParticipant(participant);
+            await _participantData.SaveParticipant(participant);
 
             participant.Username = currUser.UserName!;
             pollToJoin.Participants = [participant];

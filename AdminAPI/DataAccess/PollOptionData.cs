@@ -5,13 +5,13 @@ using System.Data;
 
 namespace AdminAPI.DataAccess
 {
-    internal class PollOptionData
+    internal class PollOptionSqlData : IPollOptionData
     {
         private readonly ConfigHelper _config;
 
-        public PollOptionData()
+        public PollOptionSqlData(ConfigHelper config)
         {
-            _config = new ConfigHelper();
+            _config = config;
         }
 
         public async Task<List<OptionModel>> LoadOptionsByPoll(int pollId)

@@ -7,13 +7,17 @@ using System.Threading.Tasks;
 
 namespace AdminAPI.DataAccess
 {
-    public class PollData
+    internal class PollSqlData : IPollData
     {
         private readonly ConfigHelper _config;
+        private readonly IPollOptionData _optionData;
+        private readonly IParticipantData _participantData;
 
-        public PollData()
+        public PollSqlData(ConfigHelper config, IPollOptionData optionData, IParticipantData participantData)
         {
-            _config = new ConfigHelper();
+            _config = config;
+            _optionData = optionData;
+            _participantData = participantData;
         }
 
         public async Task<PollModel?> LoadPoll(int pollId)
@@ -27,8 +31,7 @@ namespace AdminAPI.DataAccess
                     return null;
                 }
 
-                PollOptionData optionData = new PollOptionData();
-                poll.PollOptions = await optionData.LoadOptionsByPoll(pollId);
+                poll.PollOptions = await _optionData.LoadOptionsByPoll(pollId);
 
                 return poll.ToPollModel();
             }
@@ -45,8 +48,7 @@ namespace AdminAPI.DataAccess
                     return null;
                 }
 
-                PollOptionData optionData = new PollOptionData();
-                poll.PollOptions = await optionData.LoadOptionsByPoll(poll.Id);
+                poll.PollOptions = await _optionData.LoadOptionsByPoll(poll.Id);
 
                 return poll.ToPollModel();
             }
@@ -70,7 +72,7 @@ namespace AdminAPI.DataAccess
 
         public async Task<PollModel> SavePoll(PollModel poll)
         {
-            using (SqlDataAccess sql = new SqlDataAccess())
+            using (SqlDataAccess sql = new SqlDataAccess(_config))
             {
                 try
                 {
@@ -78,18 +80,16 @@ namespace AdminAPI.DataAccess
 
                     poll = await SavePollInTransaction(poll, sql);
 
-                    ParticipantData participantData = new ParticipantData();
                     poll.Participants!.ForEach(x => x.PollId = poll.Id);
                     foreach (var participant in poll.Participants)
                     {
-                        await participantData.SaveParticipant(participant, sql);
+                        await _participantData.SaveParticipant(participant, sql);
                     }
 
-                    PollOptionData optionData = new PollOptionData();
                     foreach (var opt in poll.PollOptions!)
                     {
                         opt.PollId = poll.Id;
-                        opt.Id = (await optionData.SaveOptionInPollCreation(opt, sql)).Id;
+                        opt.Id = (await _optionData.SaveOptionInPollCreation(opt, sql)).Id;
                     }
 
                     sql.CommitTransaction();

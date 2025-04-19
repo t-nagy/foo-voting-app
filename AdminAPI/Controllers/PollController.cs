@@ -13,10 +13,14 @@ namespace AdminAPI.Controllers
     public class PollController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IPollData _pollData;
+        private readonly IParticipantData _participantData;
 
-        public PollController(UserManager<IdentityUser> userManager)
+        public PollController(UserManager<IdentityUser> userManager, IPollData pollData, IParticipantData participantData)
         {
             _userManager = userManager;
+            _pollData = pollData;
+            _participantData = participantData;
         }
 
         [HttpGet(Name = "GetPolls"), Authorize]
@@ -29,8 +33,7 @@ namespace AdminAPI.Controllers
 
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
 
-            PollData data = new PollData();
-            return await data.LoadPollsAllMinimal(currUser!.Id);
+            return await _pollData.LoadPollsAllMinimal(currUser!.Id);
         }
 
         [HttpPost(Name = "CreatePoll"), Authorize]
@@ -50,8 +53,6 @@ namespace AdminAPI.Controllers
                 poll.JoinCode = Guid.NewGuid().ToString();
             }
 
-            PollData data = new PollData();
-
             poll.Participants = new List<ParticipantModel>();
             poll.Participants.Add(new ParticipantModel
             {
@@ -60,7 +61,7 @@ namespace AdminAPI.Controllers
                 HasVoted = false
             });
 
-            poll = await data.SavePoll(poll);
+            poll = await _pollData.SavePoll(poll);
 
             foreach (var participant in poll.Participants!)
             {
@@ -72,16 +73,14 @@ namespace AdminAPI.Controllers
 
         private async Task<IEnumerable<PollModel>?> GetPollById(int pollId)
         {
-            PollData data = new PollData();
-            PollModel? poll = await data.LoadPoll(pollId);
+            PollModel? poll = await _pollData.LoadPoll(pollId);
             if (poll == null)
             {
                 return null;
             }
 
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
-            ParticipantData participantData = new ParticipantData();
-            var userQuery = await participantData.GetParticipantByIdAndPoll(currUser!.Id, pollId);
+            var userQuery = await _participantData.GetParticipantByIdAndPoll(currUser!.Id, pollId);
             if (userQuery == null && !poll.IsPublic)
             {
                 return null;
@@ -89,7 +88,7 @@ namespace AdminAPI.Controllers
 
             if (userQuery?.Role == SharedLibrary.PollRole.Owner)
             {
-                poll.Participants = await participantData.GetParticipantsByPoll(poll.Id);
+                poll.Participants = await _participantData.GetParticipantsByPoll(poll.Id);
                 foreach (var p in poll.Participants)
                 {
                     p.Username = (await _userManager.FindByIdAsync(p.Username))!.UserName!;
@@ -97,7 +96,7 @@ namespace AdminAPI.Controllers
             }
             else
             {
-                ParticipantModel? selfAsParticipant = await participantData.GetParticipantByIdAndPoll(currUser.Id, poll.Id);
+                ParticipantModel? selfAsParticipant = await _participantData.GetParticipantByIdAndPoll(currUser.Id, poll.Id);
                 if (selfAsParticipant != null)
                 {
                     selfAsParticipant.Username = currUser.UserName!;

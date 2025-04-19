@@ -8,13 +8,18 @@ namespace AdminAPI.Controllers
     [ApiController]
     public class VotingEndController : ControllerBase
     {
+        private readonly IPollData _pollData;
+
+        public VotingEndController(IPollData pollData)
+        {
+            _pollData = pollData;
+        }
 
 
         [HttpGet(Name = "GetVotingEndDate")]
         public async Task<DateTime?> Get(int pollId)
         {
-            PollData pollData = new PollData();
-            return await pollData.GetVoteEndDate(pollId);
+            return await _pollData.GetVoteEndDate(pollId);
         }
     }
 }

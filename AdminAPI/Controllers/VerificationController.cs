@@ -15,17 +15,20 @@ namespace AdminAPI.Controllers
     public class VerificationController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IKeyData _keyData;
+        private readonly KeyService _keyService;
 
-        public VerificationController(UserManager<IdentityUser> userManager)
+        public VerificationController(UserManager<IdentityUser> userManager, IKeyData keyData, KeyService keyService)
         {
             _userManager = userManager;
+            _keyData = keyData;
+            _keyService = keyService;
         }
 
         [HttpGet(Name = "GetVerificationKey")]
         public VerificationKeyWrapper Get()
         {
-            KeyService keyService = new KeyService();
-            return new VerificationKeyWrapper { VerificationKey = keyService.RSA.ExportRSAPublicKeyPem() };
+            return new VerificationKeyWrapper { VerificationKey = _keyService.RSA.ExportRSAPublicKeyPem() };
         }
 
 
@@ -34,8 +37,7 @@ namespace AdminAPI.Controllers
         {
             var currUser = await _userManager.GetUserAsync(HttpContext.User);
 
-            KeyData keyData = new KeyData();
-            var registeredKeys = await keyData.GetKeyByUser(currUser!.Id);
+            var registeredKeys = await _keyData.GetKeyByUser(currUser!.Id);
             if (registeredKeys != null)
             {
                 if (registeredKeys.Any(x => x == key))
@@ -44,7 +46,7 @@ namespace AdminAPI.Controllers
                 }
             }
 
-            await keyData.SaveKey(currUser!.Id, key);
+            await _keyData.SaveKey(currUser!.Id, key);
             return true;
         }
     }
