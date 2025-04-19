@@ -1,5 +1,6 @@
-﻿using ClientLib;
-using ClientLib.Authentication;
+﻿using ClientLib.Authentication;
+using ClientLib.DataManagers;
+using ClientLib.Persistance;
 using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using WPFUI.View;
 
 namespace WPFUI.ViewModel
@@ -18,6 +20,9 @@ namespace WPFUI.ViewModel
         private readonly IAccountOperationManager _accountManager;
         private readonly IPollManager _pollManager;
         private readonly IParticipantManager _participantManager;
+        private readonly IVoteAdministrationManager _adminManager;
+        private readonly IKeyManager _keyManager;
+        private readonly IVoteManager _voteManager;
         private Page? _returnPage;
         #endregion
 
@@ -63,13 +68,24 @@ namespace WPFUI.ViewModel
         #endregion
 
 
-        public MainViewModel(IAccountOperationManager accountManager, IPollManager pollManager, IParticipantManager participantManager)
+        public MainViewModel(IAccountOperationManager accountManager, 
+                                IPollManager pollManager, 
+                                IParticipantManager participantManager, 
+                                IVoteAdministrationManager adminManager, 
+                                IKeyManager keyManager,
+                                IVoteManager voteManager)
         {
             _accountManager = accountManager;
             _pollManager = pollManager;
             _participantManager = participantManager;
+            _adminManager = adminManager;
+            _keyManager = keyManager;
+            _voteManager = voteManager;
+
             _accountManager.LoginRequired += LoginRequiredEvent;
             _pollManager.LoginRequired += LoginRequiredEvent;
+            _participantManager.LoginRequired += LoginRequiredEvent;
+            _adminManager.LoginRequired += LoginRequiredEvent;
 
             _loginPage = new LoginPage();
             _registerPage = new RegisterPage();
@@ -185,7 +201,7 @@ namespace WPFUI.ViewModel
 
         private void ShowPollDetailPage(PollModel poll)
         {
-            _pollDetailViewModel = new PollDetailViewModel(_pollManager, poll);
+            _pollDetailViewModel = new PollDetailViewModel(_pollManager, _voteManager, _keyManager,  poll);
             _pollDetailViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
             _pollDetailViewModel.ClosePollDetails += ShowPollsPageEvent;
             _pollDetailViewModel.ShowParticipants += ShowParticipantsPageEvent;

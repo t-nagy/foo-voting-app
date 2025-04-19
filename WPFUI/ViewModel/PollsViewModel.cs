@@ -1,5 +1,6 @@
 ﻿using ClientLib;
 using ClientLib.Authentication;
+using ClientLib.DataManagers;
 using SharedLibrary;
 using SharedLibrary.Models;
 using System;

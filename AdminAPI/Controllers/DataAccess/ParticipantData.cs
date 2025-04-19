@@ -1,5 +1,6 @@
 ﻿using AdminAPI.Controllers.DataAccess.DataModels;
 using Dapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using SharedLibrary;
 using SharedLibrary.Models;
@@ -63,6 +64,12 @@ namespace AdminAPI.Controllers.DataAccess
             }
         }
 
-        
+        public async Task ParticipantSetVoted(string participantId, int pollid)
+        {
+            using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.VoteDbConnectionStringName)))
+            {
+                await connection.ExecuteAsync("uspParticipant_UpdateVoted", new { UserId = participantId, PollId = pollid }, commandType: CommandType.StoredProcedure);
+            }
+        }
     }
 }

@@ -1,11 +1,24 @@
 ﻿using ClientLib;
+using ClientLib.DataManagers;
+using ClientLib.Persistance;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
 using SharedLibrary;
 using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using WPFUI.DisplayModels;
@@ -15,7 +28,10 @@ namespace WPFUI.ViewModel
     class PollDetailViewModel : ViewModelBase
     {
         private readonly IPollManager _pollManager;
-        private readonly ParticipantModel? _currUserAsParticipant;
+        private readonly IVoteManager _voteManager;
+        private readonly IKeyManager _keyManager;
+        private ParticipantModel? _currUserAsParticipant;
+
         public PollModel Poll { get; }
 
         public DelegateCommand AccountSettingsCommand { get; private set; }
@@ -27,9 +43,11 @@ namespace WPFUI.ViewModel
         public event EventHandler? ClosePollDetails;
         public event EventHandler<PollModel>? ShowParticipants;
 
-        public PollDetailViewModel(IPollManager pollManager, PollModel poll)
+        public PollDetailViewModel(IPollManager pollManager, IVoteManager voteManager, IKeyManager keyManager, PollModel poll)
         {
             _pollManager = pollManager;
+            _voteManager = voteManager;
+            _keyManager = keyManager;
             Poll = poll;
             ParticipantModel? currUserAsParticipant = poll.Participants?.Find(x => x.Username == _pollManager.LoggedInEmail);
             if (currUserAsParticipant == null && !Poll.IsPublic)
@@ -48,11 +66,12 @@ namespace WPFUI.ViewModel
                 ClosePollDetails?.Invoke(this, EventArgs.Empty);
             });
 
-            PrimaryActionCommand = new DelegateCommand((param) =>
+            PrimaryActionCommand = new DelegateCommand(async (param) =>
             {
                 switch (Poll.Status)
                 {
                     case SharedLibrary.PollStatus.Vote:
+                        await SubmitVote();
                         break;
                     case SharedLibrary.PollStatus.Validate:
                         break;
@@ -75,6 +94,19 @@ namespace WPFUI.ViewModel
                 displayOption.OptionSelected += OptionSelected;
                 Options.Add(displayOption);
             });
+
+            if (_currUserAsParticipant != null && _currUserAsParticipant.HasVoted)
+            {
+                if (_voteManager.TryGetVotedOptionId(Poll.Id, out int optToSelect))
+                {
+                    Options.First(x => x.Model.Id == optToSelect).IsSelected = true;
+                }
+                else
+                {
+                    ErrorText = "To view which option you voted for please log in from the same device you have submitted your vote on!";
+                    IsErrorTextVisible = true;
+                }
+            }
         }
 
         public ObservableCollection<DisplayOptionModel> Options { get; }
@@ -150,11 +182,14 @@ namespace WPFUI.ViewModel
                 switch (Poll.Status)
                 {
                     case PollStatus.Vote:
-                        if (!Poll.IsPublic)
+                        if (_currUserAsParticipant != null)
                         {
                             return !_currUserAsParticipant!.HasVoted;
                         }
-                        return true;
+                        else
+                        {
+                            return true;
+                        }
                     case PollStatus.Validate:
                         // TODO - Check if app has key required to validate
                         return true;
@@ -162,6 +197,21 @@ namespace WPFUI.ViewModel
                         return false;
                     default:
                         throw new InvalidOperationException();
+                }
+            }
+        }
+
+        public bool CanChangeVoteOption
+        {
+            get
+            {
+                if (_currUserAsParticipant != null)
+                {
+                    return !_currUserAsParticipant.HasVoted;
+                }
+                else
+                {
+                    return true;
                 }
             }
         }
@@ -176,7 +226,49 @@ namespace WPFUI.ViewModel
         public bool IsErrorTextVisible
         {
             get { return _isErrorTextVisible; }
-            set { _isErrorTextVisible = value; OnPropertyChanged(); }
+            set 
+            { 
+                _isErrorTextVisible = value;
+                if (value == true)
+                {
+                    IsSuccessfulActionTextVisible = false;
+                }
+                OnPropertyChanged(); 
+            }
+        }
+
+        private string _errorText = string.Empty;
+
+        public string ErrorText
+        {
+            get { return _errorText; }
+            set { _errorText = value; OnPropertyChanged(); }
+        }
+
+        public string SuccessfulActionText
+        {
+            get
+            {
+                switch (Poll.Status)
+                {
+                    case SharedLibrary.PollStatus.Vote:
+                        return "Your vote was successfully submitted. Please return to validate your vote in the validation period!";
+                    case SharedLibrary.PollStatus.Validate:
+                        return "Your vote was successfully validated!";
+                    case SharedLibrary.PollStatus.Closed:
+                        return "";
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
+        }
+
+        private bool _isSuccessfulActionTextVisible = false;
+
+        public bool IsSuccessfulActionTextVisible
+        {
+            get { return _isSuccessfulActionTextVisible; }
+            set { _isSuccessfulActionTextVisible = value; OnPropertyChanged(); }
         }
 
 
@@ -189,6 +281,71 @@ namespace WPFUI.ViewModel
                     option.IsSelected = false;
                 }
             }
+        }
+
+        private async Task SubmitVote()
+        {
+
+            DisplayOptionModel? selectedOption = Options.FirstOrDefault(x => x.IsSelected);
+            if (selectedOption == null)
+            {
+                ErrorText = "You must select an option before submitting your vote!";
+                IsErrorTextVisible = true;
+                return;
+            }
+
+            VoteSubmitResult result = VoteSubmitResult.UnknownFailure;
+            try
+            {
+                result = await _voteManager.SubmitVote(selectedOption.Model.PollId, selectedOption.Model.Id);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                return;
+            }
+
+            switch (result)
+            {
+                case VoteSubmitResult.Success:
+                    IsErrorTextVisible = false;
+                    if (_currUserAsParticipant != null)
+                    {
+                        _currUserAsParticipant.HasVoted = true;
+                    }
+                    else
+                    {
+                        _currUserAsParticipant = new ParticipantModel { Username = _pollManager.LoggedInEmail!, HasVoted = true, PollId = selectedOption.Model.PollId, Role = PollRole.Voter };
+                    }
+                    IsSuccessfulActionTextVisible = true;
+                    break;
+                case VoteSubmitResult.UnknownFailure:
+                    ErrorText = "An unknown error has occoured while submitting your vote. Please try again!";
+                    IsErrorTextVisible = true;
+                    break;
+                case VoteSubmitResult.KeyRegistrationFailed:
+                    ErrorText = "Unable to register your user signature key with the vote administration server. Please try again!";
+                    IsErrorTextVisible = true;
+                    break;
+                case VoteSubmitResult.NoAdminVerificationKey:
+                    ErrorText = "An error has occoured with the vote administration server. Please contact the developer!";
+                    IsErrorTextVisible = true;
+                    break;
+                case VoteSubmitResult.AdminRefusedToSign:
+                    ErrorText = "An error has occoured while validating your vote in the administration server. Please try again!";
+                    IsErrorTextVisible = true;
+                    break;
+                case VoteSubmitResult.AdminSignatureInvalid:
+                    ErrorText = "An unknown error has validating the administration servers signature. Please contact the developer!";
+                    IsErrorTextVisible = true;
+                    break;
+                default:
+                    break;
+            }
+
+            OnPropertyChanged("IsPrimaryButtonEnabled");
+            OnPropertyChanged("CanChangeVoteOption");
         }
     }
 }

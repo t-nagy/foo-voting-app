@@ -1,4 +1,5 @@
 ﻿
+using ClientLib.DataManagers;
 using System.Globalization;
 
 namespace ClientLib.Authentication

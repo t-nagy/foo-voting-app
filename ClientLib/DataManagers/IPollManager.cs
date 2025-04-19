@@ -1,7 +1,7 @@
 ﻿using ClientLib.Authentication;
 using SharedLibrary.Models;
 
-namespace ClientLib
+namespace ClientLib.DataManagers
 {
     public interface IPollManager : ILoginRequester, ILoggedInUserManager
     {

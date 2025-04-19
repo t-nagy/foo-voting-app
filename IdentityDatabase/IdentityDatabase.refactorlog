@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="4370d70e-f2d5-4d44-a989-512a8509e9ba" ChangeDateTime="04/16/2025 08:14:36">
+    <Property Name="ElementName" Value="[dbo].[Verification].[Key]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Verification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SigningKey" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ba438ec6-f9b4-4b81-b248-9035d9832b30" ChangeDateTime="04/16/2025 08:14:47">
+    <Property Name="ElementName" Value="[dbo].[Verification].[SigningKey]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Verification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SignKey" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="97c0fc43-1d55-4e88-b567-ebabc1f47494" ChangeDateTime="04/16/2025 08:14:53">
+    <Property Name="ElementName" Value="[dbo].[Verification].[Verify]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Verification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="VerifyKey" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="35e77ee8-6b50-49ea-9705-1723534b5e29" ChangeDateTime="04/16/2025 09:41:10">
+    <Property Name="ElementName" Value="[dbo].[Verification].[ClientId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Verification]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="UserId" />
+  </Operation>
+</Operations>

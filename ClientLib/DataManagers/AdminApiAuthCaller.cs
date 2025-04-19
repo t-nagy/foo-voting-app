@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientLib
+namespace ClientLib.DataManagers
 {
     public abstract class AdminApiAuthCaller : AdminApiCaller, ILoginRequester
     {

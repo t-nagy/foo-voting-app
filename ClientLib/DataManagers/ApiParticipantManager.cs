@@ -8,7 +8,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientLib
+namespace ClientLib.DataManagers
 {
     public class ApiParticipantManager : AdminApiAuthCaller, IParticipantManager
     {

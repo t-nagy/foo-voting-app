@@ -3,16 +3,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Name>VoteData</Name>
+    <Name>IdentityData</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{14512b16-79ee-4017-9a7f-3ef96551bff8}</ProjectGuid>
+    <ProjectGuid>{38eabf78-9bb5-45f3-8ade-d3e69a58c1f9}</ProjectGuid>
     <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
-    <RootNamespace>VoteDataDB</RootNamespace>
-    <AssemblyName>VoteDataDB</AssemblyName>
+    <RootNamespace>IdentityDatabase</RootNamespace>
+    <AssemblyName>IdentityDatabase</AssemblyName>
     <ModelCollation>1033, CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
     <DeployToDatabase>True</DeployToDatabase>
@@ -60,18 +60,11 @@
     <Folder Include="Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Tables\Poll.sql" />
-    <Build Include="Tables\Participant.sql" />
-    <Build Include="Stored Procedures\uspPoll_Insert.sql" />
-    <Build Include="Stored Procedures\uspParticipant_Insert.sql" />
-    <Build Include="Stored Procedures\uspPoll_GetById.sql" />
-    <Build Include="Tables\PollOption.sql" />
-    <Build Include="Stored Procedures\uspPollOption_Insert.sql" />
-    <Build Include="Stored Procedures\uspParticipant_GetByPollAndUserId.sql" />
-    <Build Include="Stored Procedures\uspPoll_GetMinimal.sql" />
-    <Build Include="Stored Procedures\uspPollOption_GetByPollId.sql" />
-    <Build Include="Stored Procedures\uspParticipant_GetByPoll.sql" />
-    <Build Include="Stored Procedures\uspPoll_GetByJoinCode.sql" />
-    <Build Include="Stored Procedures\uspParticipant_UpdateVoted.sql" />
+    <Build Include="Tables\Verification.sql" />
+    <Build Include="Stored Procedures\uspVerification_GetByUser.sql" />
+    <Build Include="Stored Procedures\uspVerification_Insert.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="IdentityDatabase.refactorlog" />
   </ItemGroup>
 </Project>

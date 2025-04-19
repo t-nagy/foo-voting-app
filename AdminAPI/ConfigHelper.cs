@@ -4,6 +4,7 @@
     {
         private readonly IConfigurationRoot _config;
         public string VoteDbConnectionStringName { get { return "VotingConnection"; } }
+        public string IdentityDbConnectionStringName { get { return "IdentityConnection"; } }
 
         public ConfigHelper()
         {

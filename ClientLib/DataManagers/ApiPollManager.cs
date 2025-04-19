@@ -8,7 +8,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientLib
+namespace ClientLib.DataManagers
 {
     public class ApiPollManager : AdminApiAuthCaller, IPollManager
     {
@@ -81,7 +81,7 @@ namespace ClientLib
             HttpResponseMessage response;
             try
             {
-                response = await _client.PostAsJsonAsync<PollModel>("/poll", poll);
+                response = await _client.PostAsJsonAsync("/poll", poll);
             }
             catch (HttpRequestException ex)
             {
