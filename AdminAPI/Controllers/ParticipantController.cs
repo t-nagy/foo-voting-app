@@ -1,4 +1,4 @@
-﻿using AdminAPI.Controllers.DataAccess;
+﻿using AdminAPI.DataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

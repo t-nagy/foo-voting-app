@@ -37,7 +37,7 @@ public partial class App : Application
         _adminManager = new ApiVoteAdministrationManager(_sessionManager);
         _keyManager = new KeyManager(_sessionManager);
         _localDataAccess = new XMLVoteDataAccess();
-        _voteManager = new VoteManager(_adminManager, _keyManager, _localDataAccess);
+        _voteManager = new ApiVoteManager(_adminManager, _keyManager, _localDataAccess);
         Startup += AppStartup;
     }
 

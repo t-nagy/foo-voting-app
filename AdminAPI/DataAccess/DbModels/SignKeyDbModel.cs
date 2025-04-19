@@ -1,4 +1,4 @@
-﻿namespace AdminAPI.Controllers.DataAccess.DataModels
+﻿namespace AdminAPI.DataAccess.DataModels
 {
     internal class SignKeyDbModel
     {

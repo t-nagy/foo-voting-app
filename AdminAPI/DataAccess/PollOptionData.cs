@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using SharedLibrary.Models;
 using System.Data;
 
-namespace AdminAPI.Controllers.DataAccess
+namespace AdminAPI.DataAccess
 {
     internal class PollOptionData
     {

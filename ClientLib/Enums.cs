@@ -13,6 +13,7 @@ namespace ClientLib
         KeyRegistrationFailed,
         NoAdminVerificationKey,
         AdminRefusedToSign,
-        AdminSignatureInvalid
+        AdminSignatureInvalid,
+        ShufflerPostFailed
     }
 }

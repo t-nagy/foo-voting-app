@@ -1,11 +1,11 @@
-﻿using AdminAPI.Controllers.DataAccess.DataModels;
+﻿using AdminAPI.DataAccess.DataModels;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using SharedLibrary.Models;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace AdminAPI.Controllers.DataAccess
+namespace AdminAPI.DataAccess
 {
     public class PollData
     {
@@ -101,6 +101,14 @@ namespace AdminAPI.Controllers.DataAccess
             }
 
             return poll;
+        }
+
+        public async Task<DateTime?> GetVoteEndDate(int pollId)
+        {
+            using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.VoteDbConnectionStringName)))
+            {
+                return (await connection.QueryAsync<DateTime>("uspPoll_GetValidationEndByPoll", new { PollId = pollId }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+            }
         }
 
         private async Task<PollModel> SavePollInTransaction(PollModel poll, SqlDataAccess sql)

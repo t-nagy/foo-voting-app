@@ -10,13 +10,14 @@ using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ClientLib.DataManagers
 {
-    public class VoteManager : IVoteManager
+    public class ApiVoteManager : ShufflerApiCaller, IVoteManager
     {
         private readonly IVoteAdministrationManager _adminManager;
         private readonly IKeyManager _keyManager;
@@ -29,7 +30,7 @@ namespace ClientLib.DataManagers
             get { return DotNetUtilities.GetRsaPublicKey(adminRSA); }
         }
 
-        public VoteManager(IVoteAdministrationManager adminManager, IKeyManager keyManager, ILocalVoteDataAccess localDataAccess)
+        public ApiVoteManager(IVoteAdministrationManager adminManager, IKeyManager keyManager, ILocalVoteDataAccess localDataAccess)
         {
             _adminManager = adminManager;
             _keyManager = keyManager;
@@ -82,14 +83,23 @@ namespace ClientLib.DataManagers
                 return VoteSubmitResult.AdminRefusedToSign;
             }
 
-            SignedBallotModel adminSignedUnblindedBallot = new SignedBallotModel { Ballot = adminSignedBlindedBallot.Ballot, PollId = adminSignedBlindedBallot.PollId };
+            SignedBallotModel adminSignedUnblindedBallot = new SignedBallotModel { Ballot = commitedBallot, PollId = adminSignedBlindedBallot.PollId };
             adminSignedUnblindedBallot.Signature = UnblindSignature(adminSignedBlindedBallot.Signature!);
-            if (!VerifyAdminSignature(commitedBallot, adminSignedUnblindedBallot.Signature))
+            if (!VerifyAdminSignature(adminSignedUnblindedBallot.Ballot, adminSignedUnblindedBallot.Signature))
             {
                 return VoteSubmitResult.AdminSignatureInvalid;
             }
 
             _localDataAccess.StoreVote(_adminManager.LoggedInEmail!, adminSignedUnblindedBallot, userPollRSA, voteOptionId);
+
+            if (!await PostVoteToShuffler(adminSignedUnblindedBallot))
+            {
+                return VoteSubmitResult.ShufflerPostFailed;
+            }
+
+            var decrypted = userPollRSA.Decrypt(adminSignedUnblindedBallot.Ballot, RSAEncryptionPadding.Pkcs1);
+            var encoder = new UTF8Encoding();
+            var dstring = encoder.GetString(decrypted);
 
             return VoteSubmitResult.Success;
         }
@@ -142,6 +152,27 @@ namespace ClientLib.DataManagers
             signer.Init(false, AdminPublicKey);
             signer.BlockUpdate(cb, 0, cb.Length);
             return signer.VerifySignature(scb);
+        }
+
+        private async Task<bool> PostVoteToShuffler(SignedBallotModel vote)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                var content = new HttpRequestMessage();
+                response = await _client.PostAsJsonAsync("/vote", vote);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 

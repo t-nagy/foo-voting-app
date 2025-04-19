@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace AdminAPI.Controllers.DataAccess
+namespace AdminAPI.DataAccess
 {
     internal class SqlDataAccess : IDisposable
     {

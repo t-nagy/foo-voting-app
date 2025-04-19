@@ -1,9 +1,9 @@
-﻿using AdminAPI.Controllers.DataAccess.DataModels;
+﻿using AdminAPI.DataAccess.DataModels;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace AdminAPI.Controllers.DataAccess
+namespace AdminAPI.DataAccess
 {
     public class KeyData
     {

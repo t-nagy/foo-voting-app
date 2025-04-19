@@ -1,4 +1,4 @@
-﻿using AdminAPI.Controllers.DataAccess.DataModels;
+﻿using AdminAPI.DataAccess.DataModels;
 using Dapper;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
@@ -6,7 +6,7 @@ using SharedLibrary;
 using SharedLibrary.Models;
 using System.Data;
 
-namespace AdminAPI.Controllers.DataAccess
+namespace AdminAPI.DataAccess
 {
     internal class ParticipantData
     {
@@ -53,13 +53,13 @@ namespace AdminAPI.Controllers.DataAccess
 
             if (sql != null)
             {
-                await sql.Connection!.ExecuteAsync("uspParticipant_Insert", p, commandType: System.Data.CommandType.StoredProcedure, transaction: sql.Transaction);
+                await sql.Connection!.ExecuteAsync("uspParticipant_Insert", p, commandType: CommandType.StoredProcedure, transaction: sql.Transaction);
                 return;
             }
 
             using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.VoteDbConnectionStringName)))
             {
-                await connection.ExecuteAsync("uspParticipant_Insert", p, commandType: System.Data.CommandType.StoredProcedure);
+                await connection.ExecuteAsync("uspParticipant_Insert", p, commandType: CommandType.StoredProcedure);
                 return;
             }
         }

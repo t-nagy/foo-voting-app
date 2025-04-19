@@ -1,7 +1,7 @@
 ﻿using SharedLibrary;
 using SharedLibrary.Models;
 
-namespace AdminAPI.Controllers.DataAccess.DataModels
+namespace AdminAPI.DataAccess.DataModels
 {
     internal class ParticipantDbModel
     {
@@ -15,9 +15,9 @@ namespace AdminAPI.Controllers.DataAccess.DataModels
             return new ParticipantModel
             {
                 Username = UserId,
-                PollId = this.PollId,
+                PollId = PollId,
                 Role = (PollRole)ParticipantRole,
-                HasVoted = this.HasVoted
+                HasVoted = HasVoted
             };
         }
     }

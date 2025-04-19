@@ -1,7 +1,7 @@
 ﻿using SharedLibrary.Models;
 using SharedLibrary;
 
-namespace AdminAPI.Controllers.DataAccess.DataModels
+namespace AdminAPI.DataAccess.DataModels
 {
     public class PollDbModel
     {
