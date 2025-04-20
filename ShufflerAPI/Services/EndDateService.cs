@@ -49,7 +49,7 @@ namespace ShufflerAPI.Services
             HttpResponseMessage response;
             try
             {
-                response = await _client.GetAsync($"/validationEnd/{pollId}");
+                response = await _client.GetAsync($"/validationEnd/?pollId={pollId}");
             }
             catch (HttpRequestException)
             {

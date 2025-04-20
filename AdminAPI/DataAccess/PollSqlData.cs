@@ -107,6 +107,14 @@ namespace AdminAPI.DataAccess
         {
             using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.VoteDbConnectionStringName)))
             {
+                return (await connection.QueryAsync<DateTime>("uspPoll_GetVotingEndByPoll", new { PollId = pollId }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+            }
+        }
+
+        public async Task<DateTime?> GetValidationEndDate(int pollId)
+        {
+            using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.VoteDbConnectionStringName)))
+            {
                 return (await connection.QueryAsync<DateTime>("uspPoll_GetValidationEndByPoll", new { PollId = pollId }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
             }
         }

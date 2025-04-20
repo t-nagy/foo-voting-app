@@ -46,6 +46,7 @@ namespace ClientLib.Persistance
             XmlElement pollElement = doc.CreateElement("Poll");
             pollElement.SetAttribute("Id", ballot.PollId.ToString());
             pollElement.SetAttribute("User", username);
+            pollElement.SetAttribute("Validated", "false");
 
             var keysElement = doc.CreateElement("Keys");
             keysElement.InnerText = pollKeys.ToXmlString(true);
@@ -130,7 +131,7 @@ namespace ClientLib.Persistance
                     }
                     ballot = new SignedBallotModel { Ballot = BigInteger.Parse(ballotNode.InnerText).ToByteArray(), PollId = pollId };
 
-                    var signatureNode = ((XmlNode)p).SelectSingleNode("CommitedBallot");
+                    var signatureNode = ((XmlNode)p).SelectSingleNode("VerificationSignature");
                     if (signatureNode == null)
                     {
                         return false;
@@ -141,6 +142,107 @@ namespace ClientLib.Persistance
             }
 
             return false;
+        }
+
+        public bool TryGetKey(string username, int pollId, out RSA? key)
+        {
+            key = null;
+            if (!File.Exists(XmlPath))
+            {
+                return false;
+            }
+
+            var xml = new XmlDocument();
+            xml.Load(XmlPath);
+            var polls = xml.SelectNodes("//Poll");
+            if (polls == null)
+            {
+                return false;
+            }
+
+            foreach (XmlElement p in polls)
+            {
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                {
+                    var keysNode = ((XmlNode)p).SelectSingleNode("Keys");
+                    if (keysNode == null)
+                    {
+                        return false;
+                    }
+
+                    RSA ret = new RSACryptoServiceProvider();
+                    ret.FromXmlString(keysNode.InnerText);
+                    key = ret;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public ValidatedState GetValidatedState(string username, int pollId)
+        {
+            if (!File.Exists(XmlPath))
+            {
+                return ValidatedState.DifferentMachine;
+            }
+
+            var xml = new XmlDocument();
+            xml.Load(XmlPath);
+            var polls = xml.SelectNodes("//Poll");
+            if (polls == null)
+            {
+                return ValidatedState.DifferentMachine;
+            }
+
+            foreach (XmlElement p in polls)
+            {
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                {
+                    if (p.GetAttribute("Validated") == "true")
+                    {
+                        return ValidatedState.Yes;
+                    }
+                    else
+                    {
+                        return ValidatedState.No;
+                    }
+                }
+            }
+
+            return ValidatedState.DifferentMachine;
+        }
+
+        public void UpdateValidatedAttribute(string username, int pollId)
+        {
+            if (!File.Exists(XmlPath))
+            {
+                return;
+            }
+
+            var xml = new XmlDocument();
+            xml.Load(XmlPath);
+            var polls = xml.SelectNodes("//Poll");
+            if (polls == null)
+            {
+                return;
+            }
+
+            bool found = false;
+            foreach (XmlElement p in polls)
+            {
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                {
+                    p.SetAttribute("Validated", "true");
+                    found = true;
+                }
+            }
+
+            if (found)
+            {
+                xml.Save(XmlPath);
+            }
         }
     }
 }

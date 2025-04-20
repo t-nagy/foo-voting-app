@@ -111,8 +111,8 @@ namespace ClientLib.Authentication
 
             if (!response.IsSuccessStatusCode)
             {
-                // TODO - Replace with error handling
-                throw new HttpRequestException($"{response.StatusCode}: {response.Content}");
+                Logout();
+                return false;
             }
             AuthenticationResponse? res = await response.Content.ReadFromJsonAsync<AuthenticationResponse>();
             if (res != null && res.TokenType == "Bearer")

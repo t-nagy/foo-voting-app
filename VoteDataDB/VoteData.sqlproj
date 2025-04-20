@@ -75,5 +75,6 @@
     <Build Include="Stored Procedures\uspParticipant_UpdateVoted.sql" />
     <Build Include="Stored Procedures\uspPoll_GetVotingEndByPoll.sql" />
     <Build Include="Stored Procedures\uspPoll_GetValidationEndByPoll.sql" />
+    <Build Include="Tables\PublishedVote.sql" />
   </ItemGroup>
 </Project>

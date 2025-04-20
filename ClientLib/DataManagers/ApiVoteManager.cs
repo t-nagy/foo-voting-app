@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,6 +61,11 @@ namespace ClientLib.DataManagers
             return false;
         }
 
+        public ValidatedState GetValidatedState(int pollId)
+        {
+            return _localDataAccess.GetValidatedState(_adminManager.LoggedInEmail!, pollId);
+        }
+
         public async Task<VoteSubmitResult> SubmitVote(int pollId, int voteOptionId)
         {
             if (!await _adminManager.TryRegisterKey(_keyManager.GetUserSigningKey().ExportRSAPublicKeyPem()))
@@ -92,16 +98,38 @@ namespace ClientLib.DataManagers
 
             _localDataAccess.StoreVote(_adminManager.LoggedInEmail!, adminSignedUnblindedBallot, userPollRSA, voteOptionId);
 
+            // TODO - Encrypt using counter authority's public key before posting to shuffler
             if (!await PostVoteToShuffler(adminSignedUnblindedBallot))
             {
                 return VoteSubmitResult.ShufflerPostFailed;
             }
 
-            var decrypted = userPollRSA.Decrypt(adminSignedUnblindedBallot.Ballot, RSAEncryptionPadding.Pkcs1);
-            var encoder = new UTF8Encoding();
-            var dstring = encoder.GetString(decrypted);
-
             return VoteSubmitResult.Success;
+        }
+
+        public async Task<VoteValidationResult> ValidateVote(int pollId)
+        {
+            SignedBallotModel ballot;
+            RSA key;
+            if (!_localDataAccess.TryGetBallot(_adminManager.LoggedInEmail!, pollId, out ballot!))
+            {
+                throw new InvalidOperationException();
+            }
+            if (!_localDataAccess.TryGetKey(_adminManager.LoggedInEmail!, pollId, out key!))
+            {
+                throw new InvalidOperationException();
+            }
+            ValidationModel validation = new ValidationModel {PollId = ballot.PollId, EncryptedBallot = new BigInteger(ballot.Ballot).ToString(), EncryptionKey = key.ExportRSAPrivateKeyPem() };
+
+            // TODO - Encrypt using counter authority's public key before posting to shuffler
+            if (!await PostValidationToShuffler(validation))
+            {
+                return VoteValidationResult.ShufflerPostFailed;
+            }
+
+            _localDataAccess.UpdateValidatedAttribute(_adminManager.LoggedInEmail!, pollId);
+
+            return VoteValidationResult.Success;
         }
 
         private byte[] EncryptBallot(int voteOptionId, RSA userPollRSA)
@@ -174,6 +202,28 @@ namespace ClientLib.DataManagers
 
             return false;
         }
+
+        private async Task<bool> PostValidationToShuffler(ValidationModel validation)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                var content = new HttpRequestMessage();
+                response = await _client.PostAsJsonAsync("/validate", validation);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage, ex);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
     }
 
 

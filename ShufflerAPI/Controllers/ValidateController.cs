@@ -28,6 +28,12 @@ namespace ShufflerAPI.Controllers
                 return BadRequest();
             }
 
+            var validationEndDate = await _endService.GetValidationEndDate(validation.PollId);
+            if (validationEndDate == null || validationEndDate == default || validationEndDate < DateTime.UtcNow)
+            {
+                return BadRequest();
+            }
+
             await _voteData.UpdateValidation(validation);
 
             return Ok();

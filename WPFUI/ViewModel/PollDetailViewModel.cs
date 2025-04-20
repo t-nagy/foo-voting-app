@@ -74,6 +74,7 @@ namespace WPFUI.ViewModel
                         await SubmitVote();
                         break;
                     case SharedLibrary.PollStatus.Validate:
+                        await ValidateVote();
                         break;
                     case SharedLibrary.PollStatus.Closed:
                         break;
@@ -191,8 +192,19 @@ namespace WPFUI.ViewModel
                             return true;
                         }
                     case PollStatus.Validate:
-                        // TODO - Check if app has key required to validate
-                        return true;
+                        switch (_voteManager.GetValidatedState(Poll.Id))
+                        {
+                            case ValidatedState.Yes:
+                                IsSuccessfulActionTextVisible = true;
+                                return false;
+                            case ValidatedState.No:
+                                return true;
+                            case ValidatedState.DifferentMachine:
+                                ErrorText = "You can only validate your vote using the same device you have submitted the vote from!";
+                                return false;
+                            default:
+                                throw new InvalidOperationException();
+                        }
                     case PollStatus.Closed:
                         return false;
                     default:
@@ -254,7 +266,7 @@ namespace WPFUI.ViewModel
                     case SharedLibrary.PollStatus.Vote:
                         return "Your vote was successfully submitted. Please return to validate your vote in the validation period!";
                     case SharedLibrary.PollStatus.Validate:
-                        return "Your vote was successfully validated!";
+                        return "Your vote has been successfully validated. Nothing further to do until the end of the poll!";
                     case SharedLibrary.PollStatus.Closed:
                         return "";
                     default:
@@ -268,7 +280,15 @@ namespace WPFUI.ViewModel
         public bool IsSuccessfulActionTextVisible
         {
             get { return _isSuccessfulActionTextVisible; }
-            set { _isSuccessfulActionTextVisible = value; OnPropertyChanged(); }
+            set 
+            { 
+                _isSuccessfulActionTextVisible = value;
+                if (value == true)
+                {
+                    IsErrorTextVisible = false;
+                }
+                OnPropertyChanged(); 
+            }
         }
 
 
@@ -340,6 +360,10 @@ namespace WPFUI.ViewModel
                     ErrorText = "An unknown error has validating the administration servers signature. Please contact the developer!";
                     IsErrorTextVisible = true;
                     break;
+                case VoteSubmitResult.ShufflerPostFailed:
+                    ErrorText = "Your vote could not be submitted to the counting authority. Please contact the developer!";
+                    IsErrorTextVisible = true;
+                    break;
                 default:
                     break;
             }
@@ -347,5 +371,41 @@ namespace WPFUI.ViewModel
             OnPropertyChanged("IsPrimaryButtonEnabled");
             OnPropertyChanged("CanChangeVoteOption");
         }
+
+        private async Task ValidateVote()
+        {
+            VoteValidationResult result;
+            try
+            {
+                result = await _voteManager.ValidateVote(Poll.Id);
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+                return;
+            }
+
+            switch (result)
+            {
+                case VoteValidationResult.Success:
+                    IsErrorTextVisible = false;
+                    IsSuccessfulActionTextVisible = true;
+                    break;
+                case VoteValidationResult.UnknownFailure:
+                    ErrorText = "An unknown error has occoured while submitting your vote. Please try again!";
+                    IsErrorTextVisible = true;
+                    break;
+                case VoteValidationResult.ShufflerPostFailed:
+                    ErrorText = "Your validation request could not be submitted to the counting authority. Please contact the developer!";
+                    IsErrorTextVisible = true;
+                    break;
+                default:
+                    break;
+            }
+
+            OnPropertyChanged("IsPrimaryButtonEnabled");
+        }
+
     }
 }

@@ -16,4 +16,18 @@ namespace ClientLib
         AdminSignatureInvalid,
         ShufflerPostFailed
     }
+
+    public enum VoteValidationResult
+    {
+        Success,
+        UnknownFailure,
+        ShufflerPostFailed
+    }
+
+    public enum ValidatedState
+    {
+        Yes,
+        No,
+        DifferentMachine
+    }
 }
