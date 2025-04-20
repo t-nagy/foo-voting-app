@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspVote_UpdateValidation]
 	@PollId INT,
-	@EncryptedBallot NVARCHAR(1024),
-	@EncryptionKey NVARCHAR(1024)
+	@EncryptedBallot NVARCHAR(2048),
+	@EncryptionKey NVARCHAR(2048)
 AS
 BEGIN
 	UPDATE [dbo].[Vote]
-	SET [EncyptionKey] = @EncryptionKey
+	SET [EncryptionKey] = @EncryptionKey
 	WHERE [PollId] = @PollId AND [EncryptedBallot] = @EncryptedBallot;
 END;

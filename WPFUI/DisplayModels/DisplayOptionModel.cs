@@ -39,5 +39,37 @@ namespace WPFUI.DisplayModels
         {
             Model = model;
         }
+
+        private bool _isWinner = false;
+
+        public bool IsWinner
+        {
+            get { return _isWinner; }
+            set { _isWinner = value; OnPropertyChanged(); OnPropertyChanged("ForegroundColor"); }
+        }
+
+        public string ForegroundColor
+        {
+            get
+            {
+                return IsWinner ? "Green" : "Black";
+            }
+        }
+
+        private double _percentage;
+
+        public double Percentage
+        {
+            get { return _percentage; }
+            set { _percentage = value; OnPropertyChanged(); OnPropertyChanged("DisplayPercentage"); }
+        }
+
+        public string DisplayPercentage
+        {
+            get
+            {
+                return $"{Math.Round(Percentage * 100, 0, MidpointRounding.AwayFromZero)}%";
+            }
+        }
     }
 }

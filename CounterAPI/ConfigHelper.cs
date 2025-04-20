@@ -1,9 +1,9 @@
-﻿namespace ShufflerAPI
+﻿namespace CounterAPI
 {
     public class ConfigHelper
     {
         private readonly IConfigurationRoot _config;
-        public string ShufflerDbConnectionStringName { get { return "ShufflerDataConnection"; } }
+        public string VoteDataConnectionStringName { get { return "VoteDataConnection"; } }
 
         public ConfigHelper()
         {
@@ -19,7 +19,7 @@
 
         public string GetAPIUsageKey()
         {
-            return _config["CounterAPIUsageKey"]!;
+            return _config["UsageKey"]!;
         }
     }
 }

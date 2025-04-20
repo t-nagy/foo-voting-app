@@ -4,6 +4,6 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT [PollId], [EncryptedBallot], [EncyptionKey] FROM [dbo].[Vote]
+	SELECT [PollId], [EncryptedBallot], [EncryptionKey] FROM [dbo].[Vote]
 	WHERE PollId = @PollId;
 END;

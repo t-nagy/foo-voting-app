@@ -26,9 +26,9 @@ namespace AdminAPI.Controllers
         }
 
         [HttpGet(Name = "GetVerificationKey")]
-        public VerificationKeyWrapper Get()
+        public RSAKeyWrapper Get()
         {
-            return new VerificationKeyWrapper { VerificationKey = _keyService.RSA.ExportRSAPublicKeyPem() };
+            return new RSAKeyWrapper { Key = _keyService.RSA.ExportRSAPublicKeyPem() };
         }
 
 

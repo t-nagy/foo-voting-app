@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace SharedLibrary.Models
 {
-    public class VerificationKeyWrapper
+    public class RSAKeyWrapper
     {
-        public required string VerificationKey { get; set; }
+        public required string Key { get; set; }
     }
 }

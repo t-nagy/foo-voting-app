@@ -28,7 +28,7 @@ namespace ClientLib.Persistance
             get { return XmlFolder + "\\" + xmlFileName; }
         }
 
-        public void StoreVote(string username, SignedBallotModel ballot, RSA pollKeys, int optionId)
+        public void StoreVote(string username, SignedBallotModel ballot, BigInteger transportEncryptedBallot, RSA pollKeys, int optionId)
         {
             var doc = new XmlDocument();
             if (!Directory.Exists(XmlFolder))
@@ -55,6 +55,10 @@ namespace ClientLib.Persistance
             var cb = doc.CreateElement("CommitedBallot");
             cb.InnerText = new BigInteger(ballot.Ballot).ToString();
             pollElement.AppendChild(cb);
+
+            var transEncBallot = doc.CreateElement("TransportEncryptedBallot");
+            transEncBallot.InnerText = transportEncryptedBallot.ToString();
+            pollElement.AppendChild(transEncBallot);
 
             var scb = doc.CreateElement("VerificationSignature");
             scb.InnerText = new BigInteger(ballot.Signature!).ToString();
@@ -137,6 +141,41 @@ namespace ClientLib.Persistance
                         return false;
                     }
                     ballot.Signature = BigInteger.Parse(signatureNode.InnerText).ToByteArray();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TryGetTransportEncryptedBallot(string username, int pollId, out BigInteger encBallot)
+        {
+            encBallot = 0;
+            if (!File.Exists(XmlPath))
+            {
+                return false;
+            }
+
+            var xml = new XmlDocument();
+            xml.Load(XmlPath);
+            var polls = xml.SelectNodes("//Poll");
+            if (polls == null)
+            {
+                return false;
+            }
+
+            foreach (XmlElement p in polls)
+            {
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                {
+
+                    var ballotNode = ((XmlNode)p).SelectSingleNode("TransportEncryptedBallot");
+                    if (ballotNode == null)
+                    {
+                        return false;
+                    }
+                    encBallot = BigInteger.Parse(ballotNode.InnerText);
+
                     return true;
                 }
             }

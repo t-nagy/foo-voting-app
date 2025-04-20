@@ -98,15 +98,29 @@ namespace WPFUI.ViewModel
 
             if (_currUserAsParticipant != null && _currUserAsParticipant.HasVoted)
             {
-                if (_voteManager.TryGetVotedOptionId(Poll.Id, out int optToSelect))
+                if (_voteManager.TryGetVotedOptionId(Poll.Id, out int optToSelect) && (Poll.Status != PollStatus.Closed || _voteManager.GetValidatedState(Poll.Id) == ValidatedState.Yes))
                 {
                     Options.First(x => x.Model.Id == optToSelect).IsSelected = true;
                 }
                 else
                 {
-                    ErrorText = "To view which option you voted for please log in from the same device you have submitted your vote on!";
-                    IsErrorTextVisible = true;
+                    if (Poll.Status == PollStatus.Closed)
+                    {
+                        ErrorText = "To view which option you voted for and to make sure your vote was counted in the poll please log in from the same device you have submitted your vote on!";
+                        IsErrorTextVisible = true; 
+                    }
+                    else
+                    {
+                        ErrorText = "To view which option you voted for please log in from the same device you have submitted your vote on!";
+                        IsErrorTextVisible = true;
+                    }
                 }
+            }
+
+            if (Poll.Status == PollStatus.Closed)
+            {
+                SetPercentages();
+                IsPercentageVisible = true;
             }
         }
 
@@ -192,18 +206,25 @@ namespace WPFUI.ViewModel
                             return true;
                         }
                     case PollStatus.Validate:
-                        switch (_voteManager.GetValidatedState(Poll.Id))
+                        if (_currUserAsParticipant != null && _currUserAsParticipant.HasVoted)
                         {
-                            case ValidatedState.Yes:
-                                IsSuccessfulActionTextVisible = true;
-                                return false;
-                            case ValidatedState.No:
-                                return true;
-                            case ValidatedState.DifferentMachine:
-                                ErrorText = "You can only validate your vote using the same device you have submitted the vote from!";
-                                return false;
-                            default:
-                                throw new InvalidOperationException();
+                            switch (_voteManager.GetValidatedState(Poll.Id))
+                            {
+                                case ValidatedState.Yes:
+                                    IsSuccessfulActionTextVisible = true;
+                                    return false;
+                                case ValidatedState.No:
+                                    return true;
+                                case ValidatedState.DifferentMachine:
+                                    ErrorText = "You can only validate your vote using the same device you have submitted the vote from!";
+                                    return false;
+                                default:
+                                    throw new InvalidOperationException();
+                            } 
+                        }
+                        else
+                        {
+                            return false;
                         }
                     case PollStatus.Closed:
                         return false;
@@ -223,14 +244,21 @@ namespace WPFUI.ViewModel
                 }
                 else
                 {
-                    return true;
+                    if (Poll.Status == PollStatus.Vote)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
         }
 
         public bool IsParticipantsButtonVisible
         {
-            get { return !Poll.IsPublic && _currUserAsParticipant!.Role == PollRole.Owner; }
+            get { return !Poll.IsPublic && _currUserAsParticipant!.Role == PollRole.Owner && Poll.Status == PollStatus.Vote; }
         }
 
         private bool _isErrorTextVisible = false;
@@ -290,6 +318,15 @@ namespace WPFUI.ViewModel
                 OnPropertyChanged(); 
             }
         }
+
+        private bool _isPercentageVisible = false;
+
+        public bool IsPercentageVisible
+        {
+            get { return _isPercentageVisible; }
+            set { _isPercentageVisible = value; OnPropertyChanged(); }
+        }
+
 
 
         private void OptionSelected(object? sender, DisplayOptionModel e)
@@ -360,6 +397,10 @@ namespace WPFUI.ViewModel
                     ErrorText = "An unknown error has validating the administration servers signature. Please contact the developer!";
                     IsErrorTextVisible = true;
                     break;
+                case VoteSubmitResult.TrasportEncryptionFailed:
+                    ErrorText = "Failed to encrypt your vote before submitting it. Please try again later! If the issue persists please contact the developer!";
+                    IsErrorTextVisible = true;
+                    break;
                 case VoteSubmitResult.ShufflerPostFailed:
                     ErrorText = "Your vote could not be submitted to the counting authority. Please contact the developer!";
                     IsErrorTextVisible = true;
@@ -405,6 +446,56 @@ namespace WPFUI.ViewModel
             }
 
             OnPropertyChanged("IsPrimaryButtonEnabled");
+        }
+
+        private async Task SetPercentages()
+        {
+            Dictionary<int, int>? voteResults;
+            try
+            {
+                voteResults = await _voteManager.GetResults(Poll.Id);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ServerUnreachableException)
+                {
+                    ErrorText = ex.Message;
+                    IsErrorTextVisible = true;
+                    return;
+                }
+                if (ex is VoteInvalidException)
+                {
+                    ErrorText = $"The integrity of this poll has been compromised. {ex.Message}";
+                    IsErrorTextVisible = true;
+                    return;
+                }
+                throw;
+            }
+            if (voteResults == null)
+            {
+                ErrorText = "An uknown error has occoured while loading the result of the poll!";
+                IsErrorTextVisible = true;
+                return;
+            }
+
+            int totalVoteCount = voteResults.Sum(x => x.Value);
+            int maxVotes = voteResults.Max(x => x.Value);
+            foreach (var opt in Options)
+            {
+                if (voteResults.ContainsKey(opt.Model.Id))
+                {
+                    int optionVoteCount = voteResults[opt.Model.Id];
+                    opt.Percentage = optionVoteCount / (double)totalVoteCount;
+                    if (optionVoteCount == maxVotes)
+                    {
+                        opt.IsWinner = true;
+                    }
+                }
+                else
+                {
+                    opt.Percentage = 0;
+                }
+            }
         }
 
     }

@@ -76,5 +76,12 @@
     <Build Include="Stored Procedures\uspPoll_GetVotingEndByPoll.sql" />
     <Build Include="Stored Procedures\uspPoll_GetValidationEndByPoll.sql" />
     <Build Include="Tables\PublishedVote.sql" />
+    <Build Include="Stored Procedures\uspPublishedVote_Insert.sql" />
+    <Build Include="Stored Procedures\uspPoll_UpdateStatus.sql" />
+    <Build Include="Stored Procedures\uspPublishedVote_UpdateValidation.sql" />
+    <Build Include="Stored Procedures\uspPublishedVote_GetEncryptedBallotByPoll.sql" />
+    <Build Include="Stored Procedures\uspPoll_GetStatusByPoll.sql" />
+    <Build Include="Stored Procedures\uspPublishedVote_GetVotesByPoll.sql" />
+    <Build Include="Stored Procedures\uspPublishedVote_GetValidatedVotesByPoll.sql" />
   </ItemGroup>
 </Project>

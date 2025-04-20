@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspVote_Insert]
 	@PollId INT,
-	@EncryptedBallot NVARCHAR(1024),
-	@AdminSignature NVARCHAR(1024)
+	@EncryptedBallot NVARCHAR(2048),
+	@AdminSignature NVARCHAR(2048)
 AS
 BEGIN
 	INSERT INTO [dbo].[Vote] ([PollId], [EncryptedBallot], [AdminSignature])

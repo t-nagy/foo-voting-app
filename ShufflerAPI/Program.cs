@@ -19,6 +19,7 @@ namespace ShufflerAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddTransient<ConfigHelper>();
             builder.Services.AddTransient<IVoteData, VoteSqlData>();
             builder.Services.AddTransient<EndDateService>();
 

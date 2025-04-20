@@ -65,7 +65,10 @@
         <ListBox Margin="20" Grid.Row="2" VerticalAlignment="Top" MinHeight="60" ItemsSource="{Binding Options}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <CheckBox IsChecked="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Path=DataContext.CanChangeVoteOption, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}" Content="{Binding DisplayText}" FontSize="{DynamicResource FontSize-Large}" VerticalContentAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Width="40" Text="{Binding DisplayPercentage}" FontSize="{DynamicResource FontSize-Normal}" Visibility="{Binding Path=DataContext.IsPercentageVisible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Converter={StaticResource visConverter}}" Foreground="{Binding Path=ForegroundColor}" VerticalAlignment="Center" TextAlignment="Right" Padding="0 0 5 0"/>
+                        <CheckBox IsChecked="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}" Foreground="{Binding Path=ForegroundColor}" IsEnabled="{Binding Path=DataContext.CanChangeVoteOption, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}" Content="{Binding DisplayText}" FontSize="{DynamicResource FontSize-Large}" VerticalContentAlignment="Center"/>
+                    </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

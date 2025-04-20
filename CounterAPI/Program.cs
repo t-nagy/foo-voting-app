@@ -1,4 +1,6 @@
 
+using CounterAPI.DataAccess;
+
 namespace CounterAPI
 {
     public class Program
@@ -13,6 +15,11 @@ namespace CounterAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSingleton<KeyService>();
+            builder.Services.AddTransient<ConfigHelper>();
+            builder.Services.AddTransient<IPollData, PollSqlData>();
+            builder.Services.AddTransient<IVoteData, VoteSqlData>();
 
             var app = builder.Build();
 

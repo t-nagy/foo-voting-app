@@ -1,6 +1,7 @@
 ﻿using AdminAPI.DataAccess.DataModels;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using SharedLibrary;
 using SharedLibrary.Models;
 using System.Data;
 using System.Threading.Tasks;

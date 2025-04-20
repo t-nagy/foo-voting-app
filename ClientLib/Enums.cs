@@ -14,6 +14,7 @@ namespace ClientLib
         NoAdminVerificationKey,
         AdminRefusedToSign,
         AdminSignatureInvalid,
+        TrasportEncryptionFailed,
         ShufflerPostFailed
     }
 
@@ -21,7 +22,9 @@ namespace ClientLib
     {
         Success,
         UnknownFailure,
-        ShufflerPostFailed
+        TrasportEncryptionFailed,
+        ShufflerPostFailed,
+        LocalDataCorrupted
     }
 
     public enum ValidatedState

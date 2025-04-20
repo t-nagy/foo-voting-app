@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -10,7 +11,7 @@ namespace ClientLib.DataManagers
     public abstract class ShufflerApiCaller
     {
         protected readonly HttpClient _client;
-        protected readonly string _baseAdress = "https://localhost:7193";
+        protected readonly string _baseAdress = AddressService.ShufflerAddress;
 
         private const string _defaultServerUnreachableExceptionMessage = "Communication with the server failed. Please check your internet connection!";
 

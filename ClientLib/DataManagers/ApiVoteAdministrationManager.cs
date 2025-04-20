@@ -57,10 +57,10 @@ namespace ClientLib.DataManagers
 
             if (response.IsSuccessStatusCode)
             {
-                VerificationKeyWrapper? wrapper = null;
+                RSAKeyWrapper? wrapper = null;
                 try
                 {
-                    wrapper = await response.Content.ReadFromJsonAsync<VerificationKeyWrapper?>();
+                    wrapper = await response.Content.ReadFromJsonAsync<RSAKeyWrapper?>();
                 }
                 catch (Exception)
                 {
@@ -70,7 +70,7 @@ namespace ClientLib.DataManagers
                     return null;
                 }
 
-                return wrapper.VerificationKey;
+                return wrapper.Key;
             }
 
             return null;

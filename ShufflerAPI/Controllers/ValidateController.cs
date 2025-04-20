@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Models;
 using ShufflerAPI.DataAccess;
 using ShufflerAPI.Services;
+using System.Numerics;
 
 namespace ShufflerAPI.Controllers
 {
@@ -23,7 +24,7 @@ namespace ShufflerAPI.Controllers
         public async Task<IActionResult> Post(ValidationModel validation)
         {
             var votes = await _voteData.GetValidationsByPoll(validation.PollId);
-            if (votes == null || !votes.Any(x => x.EncryptedBallot == validation.EncryptedBallot && x.EncryptionKey == null))
+            if (votes == null || !votes.Any(x => new BigInteger(x.EncryptedBallot).ToString() == new BigInteger(validation.EncryptedBallot).ToString() && x.EncryptionKey == null))
             {
                 return BadRequest();
             }

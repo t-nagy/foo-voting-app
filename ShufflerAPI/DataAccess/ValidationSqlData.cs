@@ -18,7 +18,7 @@ namespace ShufflerAPI.DataAccess
         {
             using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
             {
-                var result = connection.QueryAsync<ValidationModel>("uspValidation_GetByPoll", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
+                var result = await connection.QueryAsync<ValidationModel>("uspValidation_GetByPoll", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
 
             }
         }

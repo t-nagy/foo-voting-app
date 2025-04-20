@@ -9,9 +9,9 @@ namespace ShufflerAPI.DataAccess
     {
         private readonly ConfigHelper _config;
 
-        public VoteSqlData()
+        public VoteSqlData(ConfigHelper config)
         {
-            _config = new ConfigHelper();
+            _config = config;
         }
 
         public async Task<IEnumerable<SignedBallotModel>> GetVotesByPoll(int pollId)
@@ -37,8 +37,14 @@ namespace ShufflerAPI.DataAccess
         {
             using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
             {
-                return await connection.QueryAsync<ValidationModel>("uspVote_GetValidationsByPoll", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
+                var result = await connection.QueryAsync<ValidationDbModel>("uspVote_GetValidationsByPoll", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
+                List<ValidationModel> validations = new List<ValidationModel>();
+                foreach (var v in result)
+                {
+                    validations.Add(v.ToValidationModel());
+                }
 
+                return validations;
             }
         }
 
@@ -55,7 +61,16 @@ namespace ShufflerAPI.DataAccess
         {
             using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
             {
-                await connection.ExecuteAsync("uspVote_UpdateValidation", new { PollId = validation.PollId, EncryptedBallot = validation.EncryptedBallot, EncryptionKey = validation.EncryptionKey }, commandType: System.Data.CommandType.StoredProcedure);
+                var dbModel = new ValidationDbModel(validation);
+                await connection.ExecuteAsync("uspVote_UpdateValidation", new { PollId = dbModel.PollId, EncryptedBallot = dbModel.EncryptedBallot, EncryptionKey = dbModel.EncryptionKey }, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
+
+        public async Task UpdateIsSubmitted(int pollId)
+        {
+            using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
+            {
+                await connection.ExecuteAsync("uspVote_UpdateIsSubmitted", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
     }
