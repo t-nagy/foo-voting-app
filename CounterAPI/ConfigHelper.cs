@@ -21,5 +21,10 @@
         {
             return _config["UsageKey"]!;
         }
+
+        public string GetTransportEncryptionKeyPem()
+        {
+            return _config["TransportEncryptionKeyPem"]!;
+        }
     }
 }

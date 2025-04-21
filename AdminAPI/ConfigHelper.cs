@@ -17,5 +17,10 @@
         {
             return _config.GetConnectionString(name)!;
         }
+
+        public string GetSigningKeyPem()
+        {
+            return _config["SigningKeyPem"]!;
+        }
     }
 }

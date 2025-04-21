@@ -1,5 +1,6 @@
 
 using CounterAPI.DataAccess;
+using CounterAPI.Services;
 
 namespace CounterAPI
 {
@@ -16,8 +17,8 @@ namespace CounterAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddSingleton<KeyService>();
             builder.Services.AddTransient<ConfigHelper>();
+            builder.Services.AddSingleton<KeyService>();
             builder.Services.AddTransient<IPollData, PollSqlData>();
             builder.Services.AddTransient<IVoteData, VoteSqlData>();
 

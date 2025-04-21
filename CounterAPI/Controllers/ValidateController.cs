@@ -1,5 +1,6 @@
 ﻿using CounterAPI.DataAccess;
 using CounterAPI.Models;
+using CounterAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.Utilities;
@@ -50,7 +51,7 @@ namespace CounterAPI.Controllers
             int pollId = validations.First().PollId;
 
             var validationEndDate = await _pollData.GetValidationEndDate(pollId);
-            if (validationEndDate == null || validationEndDate == default || validationEndDate < DateTime.UtcNow)
+            if (validationEndDate == null || validationEndDate == default || validationEndDate > DateTime.UtcNow)
             {
                 return BadRequest();
             }

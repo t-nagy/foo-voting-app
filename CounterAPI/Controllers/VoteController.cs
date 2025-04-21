@@ -1,4 +1,5 @@
 ﻿using CounterAPI.DataAccess;
+using CounterAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.Crypto.Digests;
@@ -50,7 +51,7 @@ namespace CounterAPI.Controllers
             int pollId = votes.First().PollId;
 
             var votingEndDate = await _pollData.GetVoteEndDate(pollId);
-            if (votingEndDate == null || votingEndDate == default || votingEndDate < DateTime.UtcNow)
+            if (votingEndDate == null || votingEndDate == default || votingEndDate > DateTime.UtcNow)
             {
                 return BadRequest();
             }

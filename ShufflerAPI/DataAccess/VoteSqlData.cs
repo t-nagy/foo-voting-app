@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using SharedLibrary.Models;
 using ShufflerAPI.DataAccess.DbModels;
+using ShufflerAPI.Models;
 
 namespace ShufflerAPI.DataAccess
 {
@@ -71,6 +72,22 @@ namespace ShufflerAPI.DataAccess
             using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
             {
                 await connection.ExecuteAsync("uspVote_UpdateIsSubmitted", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
+
+        public async Task<IEnumerable<WaitingPollModel>> GetPollIdsAndSubmittedState()
+        {
+            using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
+            {
+                return await connection.QueryAsync<WaitingPollModel>("uspVote_GetPollIdsAndSubmittedState", commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
+
+        public async Task DeleteValidatedVotes(int pollId)
+        {
+            using (SqlConnection connection = new SqlConnection(_config.GetConnectionString(_config.ShufflerDbConnectionStringName)))
+            {
+                await connection.ExecuteAsync("uspVote_DeleteByPoll", new { PollId = pollId }, commandType: System.Data.CommandType.StoredProcedure);
             }
         }
     }

@@ -55,8 +55,8 @@ namespace AdminAPI
                 options.BearerTokenExpiration = TimeSpan.FromSeconds(300);
             });
 
-            builder.Services.AddTransient<KeyService>();
             builder.Services.AddTransient<ConfigHelper>();
+            builder.Services.AddTransient<KeyService>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddTransient<IPollOptionData, PollOptionSqlData>();
             builder.Services.AddTransient<IParticipantData, ParticipantSqlData>();
