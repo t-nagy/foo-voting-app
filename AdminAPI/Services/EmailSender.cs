@@ -20,7 +20,7 @@ namespace AdminAPI.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
         {
-            await SendDebugEmail(toEmail, subject, htmlMessage);
+            await SendRealEmail(toEmail, subject, htmlMessage);
         }
 
         private async Task SendDebugEmail(string toEmail, string subject, string htmlMessage)
@@ -44,11 +44,11 @@ namespace AdminAPI.Services
 
         private async Task SendRealEmail(string toEmail, string subject, string htmlMessage)
         {
-            SmtpClient client = new SmtpClient(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"]!))
+            SmtpClient client = new SmtpClient(_config["SmtpHost"], int.Parse(_config["SmtpPort"]!))
             {
                 UseDefaultCredentials = false,
                 EnableSsl = true,
-                Credentials = new NetworkCredential(_config["Smtp:Username"], _config["Smtp:Password"]),
+                Credentials = new NetworkCredential(_config["SmtpUsername"], _config["SmtpPassword"]),
             };
 
             var sender = new SmtpSender(client);
@@ -57,10 +57,10 @@ namespace AdminAPI.Services
 
 
             var email = await Email
-                .From(_config["Smtp:Username"])
+                .From(_config["SmtpUsername"])
                 .To(toEmail)
                 .Subject(subject)
-                .Body(htmlMessage)
+                .Body(htmlMessage, true)
                 .SendAsync();
 
             if (email.Successful)

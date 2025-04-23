@@ -1,10 +1,23 @@
-﻿namespace AdminAPI
+﻿using SharedLibrary;
+
+namespace AdminAPI
 {
     public class ConfigHelper
     {
         private readonly IConfigurationRoot _config;
-        public string VoteDbConnectionStringName { get { return "VotingConnection"; } }
-        public string IdentityDbConnectionStringName { get { return "IdentityConnection"; } }
+        public string VoteDbConnectionStringName { 
+            get 
+            { 
+                return AddressService.LocalMode ? "LocalVotingConnection" : "VotingConnection"; 
+            } 
+        }
+        public string IdentityDbConnectionStringName 
+        { 
+            get 
+            { 
+                return AddressService.LocalMode ? "LocalIdentityConnection" : "IdentityConnection"; 
+            } 
+        }
 
         public ConfigHelper()
         {

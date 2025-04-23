@@ -11,6 +11,16 @@ namespace ShufflerAPI.Services
         private readonly IVoteData _voteData;
         private readonly EndDateService _endService;
         private readonly HttpClient _counterClient;
+        private readonly TimeSpan _period = TimeSpan.FromHours(1);
+
+        public DateTime LastSubmit { get; private set; }
+        public TimeSpan SubmitPeriod
+        {
+            get
+            {
+                return _period;
+            }
+        }
 
         public SubmitService(ConfigHelper config, IVoteData voteData, EndDateService endService)
         {
@@ -26,6 +36,13 @@ namespace ShufflerAPI.Services
 
         public async Task SubmitDataToCounter()
         {
+            if (LastSubmit.Add(SubmitPeriod) > DateTime.UtcNow)
+            {
+                return;
+            }
+
+            LastSubmit = DateTime.UtcNow;
+
             IEnumerable<WaitingPollModel> waitingPolls = await _voteData.GetPollIdsAndSubmittedState();
 
             List<int> pollsToSubmit = new List<int>();

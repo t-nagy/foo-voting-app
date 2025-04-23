@@ -49,7 +49,7 @@ namespace WPFUI.ViewModel
             _voteManager = voteManager;
             _keyManager = keyManager;
             Poll = poll;
-            ParticipantModel? currUserAsParticipant = poll.Participants?.Find(x => x.Username == _pollManager.LoggedInEmail);
+            ParticipantModel? currUserAsParticipant = poll.Participants?.Find(x => x.Username == _pollManager.LoggedInEmail!.ToLower());
             if (currUserAsParticipant == null && !Poll.IsPublic)
             {
                 throw new ArgumentException("Poll participant list must contain at least the poll creator!");
@@ -194,12 +194,16 @@ namespace WPFUI.ViewModel
         {
             get
             {
+                if (IsPrimaryActionInProgress)
+                {
+                    return false;
+                }
                 switch (Poll.Status)
                 {
                     case PollStatus.Vote:
                         if (_currUserAsParticipant != null)
                         {
-                            return !_currUserAsParticipant!.HasVoted;
+                            return !_currUserAsParticipant!.HasVoted && Poll.VoteCollectionEndDate > DateTime.UtcNow;
                         }
                         else
                         {
@@ -214,7 +218,14 @@ namespace WPFUI.ViewModel
                                     IsSuccessfulActionTextVisible = true;
                                     return false;
                                 case ValidatedState.No:
-                                    return true;
+                                    if (Poll.VoteValidationEndDate > DateTime.UtcNow)
+                                    {
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
                                 case ValidatedState.DifferentMachine:
                                     ErrorText = "You can only validate your vote using the same device you have submitted the vote from!";
                                     return false;
@@ -233,6 +244,20 @@ namespace WPFUI.ViewModel
                 }
             }
         }
+
+        private bool _isPrimaryActionInProgress;
+
+        public bool IsPrimaryActionInProgress
+        {
+            get { return _isPrimaryActionInProgress; }
+            set 
+            { 
+                _isPrimaryActionInProgress = value;
+                OnPropertyChanged();
+                OnPropertyChanged("IsPrimaryButtonEnabled");
+            }
+        }
+
 
         public bool CanChangeVoteOption
         {
@@ -354,14 +379,17 @@ namespace WPFUI.ViewModel
             VoteSubmitResult result = VoteSubmitResult.UnknownFailure;
             try
             {
+                IsPrimaryActionInProgress = true;
                 result = await _voteManager.SubmitVote(selectedOption.Model.PollId, selectedOption.Model.Id);
             }
             catch (ServerUnreachableException ex)
             {
                 ErrorText = ex.Message;
                 IsErrorTextVisible = true;
+                IsPrimaryActionInProgress = false;
                 return;
             }
+            IsPrimaryActionInProgress = false;
 
             switch (result)
             {
@@ -418,14 +446,17 @@ namespace WPFUI.ViewModel
             VoteValidationResult result;
             try
             {
+                IsPrimaryActionInProgress = true;
                 result = await _voteManager.ValidateVote(Poll.Id);
             }
             catch (ServerUnreachableException ex)
             {
                 ErrorText = ex.Message;
                 IsErrorTextVisible = true;
+                IsPrimaryActionInProgress = false;
                 return;
             }
+            IsPrimaryActionInProgress = false;
 
             switch (result)
             {

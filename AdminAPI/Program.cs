@@ -82,9 +82,6 @@ namespace AdminAPI
 
             app.MapControllers();
 
-            RSA rsa = new RSACryptoServiceProvider(2048);
-            Console.WriteLine(rsa.ExportRSAPrivateKeyPem());
-
             app.Run();
         }
     }

@@ -45,7 +45,7 @@ namespace ClientLib.Persistance
 
             XmlElement pollElement = doc.CreateElement("Poll");
             pollElement.SetAttribute("Id", ballot.PollId.ToString());
-            pollElement.SetAttribute("User", username);
+            pollElement.SetAttribute("User", username.ToLower());
             pollElement.SetAttribute("Validated", "false");
 
             var keysElement = doc.CreateElement("Keys");
@@ -92,7 +92,7 @@ namespace ClientLib.Persistance
 
             foreach (XmlElement p in polls)
             {
-                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username.ToLower())
                 {
                     var votedOptionNode = ((XmlNode)p).SelectSingleNode("VotedOptionId");
                     if (votedOptionNode == null)
@@ -125,7 +125,7 @@ namespace ClientLib.Persistance
 
             foreach (XmlElement p in polls)
             {
-                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username.ToLower())
                 {
 
                     var ballotNode = ((XmlNode)p).SelectSingleNode("CommitedBallot");
@@ -166,7 +166,7 @@ namespace ClientLib.Persistance
 
             foreach (XmlElement p in polls)
             {
-                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username.ToLower())
                 {
 
                     var ballotNode = ((XmlNode)p).SelectSingleNode("TransportEncryptedBallot");
@@ -201,7 +201,7 @@ namespace ClientLib.Persistance
 
             foreach (XmlElement p in polls)
             {
-                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username.ToLower())
                 {
                     var keysNode = ((XmlNode)p).SelectSingleNode("Keys");
                     if (keysNode == null)
@@ -237,7 +237,7 @@ namespace ClientLib.Persistance
 
             foreach (XmlElement p in polls)
             {
-                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username.ToLower())
                 {
                     if (p.GetAttribute("Validated") == "true")
                     {
@@ -271,7 +271,7 @@ namespace ClientLib.Persistance
             bool found = false;
             foreach (XmlElement p in polls)
             {
-                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username)
+                if (int.Parse(p.GetAttribute("Id")) == pollId && p.GetAttribute("User") == username.ToLower())
                 {
                     p.SetAttribute("Validated", "true");
                     found = true;

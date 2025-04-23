@@ -11,7 +11,7 @@ namespace ClientLib.DataManagers
     public abstract class ShufflerApiCaller
     {
         protected readonly HttpClient _client;
-        protected readonly string _baseAdress = AddressService.ShufflerAddress;
+        private readonly string _baseAdress = AddressService.ShufflerAddress;
 
         private const string _defaultServerUnreachableExceptionMessage = "Communication with the server failed. Please check your internet connection!";
 

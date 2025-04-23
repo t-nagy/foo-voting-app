@@ -1,9 +1,17 @@
-﻿namespace ShufflerAPI
+﻿using SharedLibrary;
+
+namespace ShufflerAPI
 {
     public class ConfigHelper
     {
         private readonly IConfigurationRoot _config;
-        public string ShufflerDbConnectionStringName { get { return "ShufflerDataConnection"; } }
+        public string ShufflerDbConnectionStringName 
+        { 
+            get 
+            { 
+                return AddressService.LocalMode ? "LocalShufflerDataConnection" : "ShufflerDataConnection"; 
+            } 
+        }
 
         public ConfigHelper()
         {

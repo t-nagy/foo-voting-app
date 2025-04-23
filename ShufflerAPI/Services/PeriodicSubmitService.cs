@@ -2,7 +2,6 @@
 {
     public class PeriodicSubmitService : BackgroundService
     {
-        private readonly TimeSpan _period = TimeSpan.FromHours(1);
         private int _executionCount = 0;
         private readonly SubmitService _submitService;
 
@@ -13,7 +12,7 @@
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using PeriodicTimer timer = new PeriodicTimer(_period);
+            using PeriodicTimer timer = new PeriodicTimer(_submitService.SubmitPeriod);
             while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
             {
                 try

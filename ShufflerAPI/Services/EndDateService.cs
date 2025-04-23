@@ -1,16 +1,16 @@
-﻿using System.Net.Http.Headers;
+﻿using SharedLibrary;
+using System.Net.Http.Headers;
 
 namespace ShufflerAPI.Services
 {
     public class EndDateService
     {
         private readonly HttpClient _client;
-        private readonly string _baseAdress = "https://localhost:7119";
 
         public EndDateService()
         {
             _client = new HttpClient();
-            _client.BaseAddress = new Uri(_baseAdress);
+            _client.BaseAddress = new Uri(AddressService.AdminAddress);
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));

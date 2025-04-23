@@ -17,6 +17,7 @@ namespace WPFUI.ViewModel
     class PollsViewModel : ViewModelBase
     {
         private readonly IPollManager _pollManager;
+        private readonly ShufflerApiWakeupManager _wakeupManager;
         private List<PollModel>? _realPolls;
 
         public DelegateCommand AccountSettingsCommand { get; private set; }
@@ -30,9 +31,10 @@ namespace WPFUI.ViewModel
         public event EventHandler? ShowJoinWithCodePage;
         public event EventHandler<PollModel>? ShowPollDetailPage;
 
-        public PollsViewModel(IPollManager pollManager)
+        public PollsViewModel(IPollManager pollManager, ShufflerApiWakeupManager wakeupManager)
         {
             _pollManager = pollManager;
+            _wakeupManager = wakeupManager;
             StatusOptions = new List<string>();
             StatusOptions.Add("Any");
             StatusOptions.Add("Voting");
@@ -75,6 +77,11 @@ namespace WPFUI.ViewModel
 
         private async Task RefreshPolls()
         {
+            if (!AddressService.LocalMode)
+            {
+                await WakeShuffler(); 
+            }
+
             try
             {
                 _realPolls = (await _pollManager.GetAllPollsMinimal())?.ToList();
@@ -96,6 +103,19 @@ namespace WPFUI.ViewModel
             }
             OnPropertyChanged("Polls");
             FilterPolls();
+        }
+
+        private async Task WakeShuffler()
+        {
+            try
+            {
+                await _wakeupManager.WakeShuffler();
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+            }
         }
 
         private PollDisplayModel? _selectedPoll;

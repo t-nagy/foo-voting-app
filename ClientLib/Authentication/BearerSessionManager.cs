@@ -82,7 +82,7 @@ namespace ClientLib.Authentication
                             return LoginResponse.UnknownFailure;
                     }
                 }
-                throw new HttpRequestException($"{response.StatusCode}: {response.Content}");
+                throw new ServerUnreachableException(DefaultServerUnreachableExceptionMessage);
             }
             AuthenticationResponse? res = await response.Content.ReadFromJsonAsync<AuthenticationResponse>();
             if (res != null && res.TokenType == "Bearer")

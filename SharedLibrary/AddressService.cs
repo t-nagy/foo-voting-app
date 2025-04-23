@@ -9,13 +9,13 @@ namespace SharedLibrary
 {
     public static class AddressService
     {
-        private const bool localMode = true;
+        public static bool LocalMode { get; } = false;
 
         public static string AdminAddress
         {
             get
             {
-                return localMode ? "https://localhost:7119" : "";
+                return LocalMode ? "https://localhost:7119" : "https://foo-voting-app-admi-api-g6cjaag8c9ead2fe.polandcentral-01.azurewebsites.net";
             }
         }
 
@@ -23,7 +23,7 @@ namespace SharedLibrary
         {
             get
             {
-                return localMode ? "https://localhost:7193" : "";
+                return LocalMode ? "https://localhost:7193" : "https://foo-voting-app-shuffler-api-htftedbadkf9cjh4.polandcentral-01.azurewebsites.net/";
             }
         }
 
@@ -31,7 +31,7 @@ namespace SharedLibrary
         {
             get
             {
-                return localMode ? "https://localhost:7009" : "";
+                return LocalMode ? "https://localhost:7009" : "https://foo-app-counter-api-dxb6brbkcwafbbe9.polandcentral-01.azurewebsites.net";
             }
         }
     }

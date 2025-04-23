@@ -23,6 +23,7 @@ namespace WPFUI.ViewModel
         private readonly IVoteAdministrationManager _adminManager;
         private readonly IKeyManager _keyManager;
         private readonly IVoteManager _voteManager;
+        private readonly ShufflerApiWakeupManager _wakeupManager;
         private Page? _returnPage;
         #endregion
 
@@ -73,7 +74,8 @@ namespace WPFUI.ViewModel
                                 IParticipantManager participantManager, 
                                 IVoteAdministrationManager adminManager, 
                                 IKeyManager keyManager,
-                                IVoteManager voteManager)
+                                IVoteManager voteManager,
+                                ShufflerApiWakeupManager wakeupManager)
         {
             _accountManager = accountManager;
             _pollManager = pollManager;
@@ -81,6 +83,7 @@ namespace WPFUI.ViewModel
             _adminManager = adminManager;
             _keyManager = keyManager;
             _voteManager = voteManager;
+            _wakeupManager = wakeupManager;
 
             _accountManager.LoginRequired += LoginRequiredEvent;
             _pollManager.LoginRequired += LoginRequiredEvent;
@@ -121,7 +124,7 @@ namespace WPFUI.ViewModel
         {
             if (_loginViewModel == null || clear)
             {
-                _loginViewModel = new LoginViewModel(_accountManager);
+                _loginViewModel = new LoginViewModel(_accountManager, _wakeupManager);
                 _loginViewModel.ShowRegisterPage += ShowRegisterEvent;
                 _loginViewModel.ShowPollsPage += ShowPollsPageEvent;
                 _loginViewModel.ShowForgotPasswordPage += ShowForgotPasswordEvent;
@@ -156,7 +159,7 @@ namespace WPFUI.ViewModel
 
         private void ShowPollsPage()
         {
-            _pollsViewModel = new PollsViewModel(_pollManager);
+            _pollsViewModel = new PollsViewModel(_pollManager, _wakeupManager);
             _pollsViewModel.ShowAccountSettingsPage += ShowAccountSettingsPageEvent;
             _pollsViewModel.ShowCreateNewPollPage += ShowCreatePollPageEvent;
             _pollsViewModel.ShowJoinWithCodePage += ShowJoinWithCodePageEvent;

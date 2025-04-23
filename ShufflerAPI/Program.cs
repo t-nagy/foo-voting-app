@@ -22,7 +22,7 @@ namespace ShufflerAPI
             builder.Services.AddTransient<ConfigHelper>();
             builder.Services.AddTransient<IVoteData, VoteSqlData>();
             builder.Services.AddTransient<EndDateService>();
-            builder.Services.AddTransient<SubmitService>();
+            builder.Services.AddSingleton<SubmitService>();
             builder.Services.AddSingleton<PeriodicSubmitService>();
             builder.Services.AddHostedService(provider => provider.GetRequiredService<PeriodicSubmitService>());
 

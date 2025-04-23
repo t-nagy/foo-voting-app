@@ -23,6 +23,7 @@ public partial class App : Application
     private readonly IKeyManager _keyManager;
     private readonly ILocalVoteDataAccess _localDataAccess;
     private readonly IVoteManager _voteManager;
+    private readonly ShufflerApiWakeupManager _wakeupManager;
 
     private MainWindow? _mainWindow;
     private MainViewModel? _mainViewModel;
@@ -38,13 +39,14 @@ public partial class App : Application
         _keyManager = new KeyManager(_sessionManager);
         _localDataAccess = new XMLVoteDataAccess();
         _voteManager = new ApiVoteManager(_adminManager, _keyManager, _localDataAccess);
+        _wakeupManager = new ShufflerApiWakeupManager();
         Startup += AppStartup;
     }
 
     private void AppStartup(object sender, StartupEventArgs a)
     {
         _mainWindow = new MainWindow();
-        _mainViewModel = new MainViewModel(_accountOperations, _pollManager, _participantManager, _adminManager, _keyManager, _voteManager);
+        _mainViewModel = new MainViewModel(_accountOperations, _pollManager, _participantManager, _adminManager, _keyManager, _voteManager, _wakeupManager);
         _mainWindow.DataContext = _mainViewModel;
         _mainWindow.Show();
     }

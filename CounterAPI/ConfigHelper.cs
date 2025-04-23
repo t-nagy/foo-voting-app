@@ -1,9 +1,16 @@
-﻿namespace CounterAPI
+﻿using SharedLibrary;
+
+namespace CounterAPI
 {
     public class ConfigHelper
     {
         private readonly IConfigurationRoot _config;
-        public string VoteDataConnectionStringName { get { return "VoteDataConnection"; } }
+        public string VoteDataConnectionStringName { 
+            get 
+            { 
+                return AddressService.LocalMode ? "LocalVoteDataConnection" : "VoteDataConnection"; 
+            } 
+        }
 
         public ConfigHelper()
         {

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "apis1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/foo-voting-app-shuffler-api/apis/ShufflerAPI",
+      "type": "apis.azure"
+    }
+  }
+}

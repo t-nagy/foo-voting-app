@@ -1,5 +1,7 @@
 ﻿using ClientLib;
 using ClientLib.Authentication;
+using ClientLib.DataManagers;
+using SharedLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,7 @@ namespace WPFUI.ViewModel
     public class LoginViewModel : ViewModelBase
     {
         private readonly IAccountOperationManager _accountOperationManager;
+        private readonly ShufflerApiWakeupManager _wakeupManager;
 
         public DelegateCommand LoginCommand { get; private set; }
         public DelegateCommand RegisterCommand { get; private set; }
@@ -26,9 +29,10 @@ namespace WPFUI.ViewModel
         public event EventHandler<string>? ShowForgotPasswordPage;
 
 
-        public LoginViewModel(IAccountOperationManager accountOperationManager)
+        public LoginViewModel(IAccountOperationManager accountOperationManager, ShufflerApiWakeupManager wakeupManager)
         {
             _accountOperationManager = accountOperationManager;
+            _wakeupManager = wakeupManager;
 
             LoginCommand = new DelegateCommand((param) =>
             {
@@ -52,9 +56,14 @@ namespace WPFUI.ViewModel
             {
                 ShowForgotPasswordPage?.Invoke(this, EmailAddress);
             });
+
+            if (!AddressService.LocalMode)
+            {
+                WakeShuffler(); 
+            }
         }
 
-        private string _emailAddress = "nagytomi1000@gmail.com"; //string.Empty;
+        private string _emailAddress = string.Empty;
 
         public string EmailAddress
         {
@@ -109,7 +118,7 @@ namespace WPFUI.ViewModel
             LoginResponse response;
             try
             {
-                response = await _accountOperationManager.Login(EmailAddress, "String1!" /*password*/);
+                response = await _accountOperationManager.Login(EmailAddress, password);
             }
             catch (ServerUnreachableException ex)
             {
@@ -179,6 +188,19 @@ namespace WPFUI.ViewModel
                     break;
             }
             IsErrorTextVisible = true;
+        }
+
+        private async Task WakeShuffler()
+        {
+            try
+            {
+                await _wakeupManager.WakeShuffler();
+            }
+            catch (ServerUnreachableException ex)
+            {
+                ErrorText = ex.Message;
+                IsErrorTextVisible = true;
+            }
         }
 
     }
