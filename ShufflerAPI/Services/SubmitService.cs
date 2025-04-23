@@ -41,8 +41,6 @@ namespace ShufflerAPI.Services
                 return;
             }
 
-            LastSubmit = DateTime.UtcNow;
-
             IEnumerable<WaitingPollModel> waitingPolls = await _voteData.GetPollIdsAndSubmittedState();
 
             List<int> pollsToSubmit = new List<int>();
@@ -68,18 +66,25 @@ namespace ShufflerAPI.Services
                 }
             }
 
+            bool submitSuccess = false;
             foreach (var poll in pollsToSubmit)
             {
-                await SubmitPoll(poll);
+                submitSuccess = await SubmitPoll(poll);
             }
 
+            bool validateSuccess = false;
             foreach (var poll in pollsToValidate)
             {
-                await ValidatePoll(poll);
+                validateSuccess = await ValidatePoll(poll);
+            }
+
+            if ((submitSuccess && validateSuccess) || (pollsToSubmit.Count == 0 && pollsToValidate.Count == 0))
+            {
+                LastSubmit = DateTime.UtcNow;
             }
         }
 
-        private async Task SubmitPoll(int pollId)
+        private async Task<bool> SubmitPoll(int pollId)
         {
             var votes = await _voteData.GetVotesByPoll(pollId);
 
@@ -91,16 +96,18 @@ namespace ShufflerAPI.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error occoured while trying to submit votes: {ex.Message}");
-                return;
+                return false;
             }
 
             if (response.IsSuccessStatusCode)
             {
                 await _voteData.UpdateIsSubmitted(pollId);
+                return true;
             }
+            return false;
         }
 
-        private async Task ValidatePoll(int pollId)
+        private async Task<bool> ValidatePoll(int pollId)
         {
             var validations = await _voteData.GetValidationsByPoll(pollId);
 
@@ -112,13 +119,15 @@ namespace ShufflerAPI.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error occoured while trying to validate votes: {ex.Message}");
-                return;
+                return false;
             }
 
             if (response.IsSuccessStatusCode)
             {
                 await _voteData.DeleteValidatedVotes(pollId);
+                return true;
             }
+            return false;
         }
     }
 

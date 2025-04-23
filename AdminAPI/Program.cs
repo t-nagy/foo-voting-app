@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SharedLibrary;
 using Swashbuckle.AspNetCore.Filters;
 using System.Security.Cryptography;
 using System.Xml;
@@ -37,8 +38,9 @@ namespace AdminAPI
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
             });
 
+            var identityConnectionString = AddressService.LocalMode ? "LocalIdentityConnection" : "IdentityConnection"; ;
             builder.Services.AddDbContext<DataContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString(identityConnectionString)));
 
             builder.Services.AddAuthorization();
 
